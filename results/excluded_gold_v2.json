@@ -1,0 +1,33 @@
+{
+  "rule": "gold_answerable and len(str(gold_answer)) > 100",
+  "n": 24,
+  "by_type": {
+    "numeric_reasoning": 24
+  },
+  "question_ids": [
+    "numeric-00482e52-d291-428f-b60a-9e54a6bb1abd",
+    "numeric-06f3fb76-2290-4ba1-99f6-cbe94335f569",
+    "numeric-08ead269-f5ae-4c97-96a2-3049bdddb7b7",
+    "numeric-0fcd319a-0416-46e7-be67-fa78f963b730",
+    "numeric-18e6c8ab-90e2-445a-819c-b1d01d511fda",
+    "numeric-1cff87db-2736-44a0-840f-ad77891b8bd3",
+    "numeric-2b364c9b-cc47-4d94-8629-d94426a7e881",
+    "numeric-2b3f5858-e4c4-4f06-94ac-514347152b63",
+    "numeric-37a4832b-13e2-4dcd-a24f-c56ecb26d512",
+    "numeric-3ea659ed-4036-4ba3-879b-e7a1832fa52e",
+    "numeric-555c2d3b-d0f0-4161-bfc1-fc18d15a5539",
+    "numeric-6216455a-d682-4f6f-922d-c4c8fa23f755",
+    "numeric-81a0e49d-2d34-40ec-9926-0ff9787b0d29",
+    "numeric-8fe5334a-c9d2-4b5e-859c-099349263f9a",
+    "numeric-9083751f-1eba-495a-bd30-5241ff025d83",
+    "numeric-91ea7702-6ee2-4889-bc56-73736b2faf00",
+    "numeric-ad2d2da3-0786-4887-a620-2419fcd5d6fa",
+    "numeric-ad9a7017-1262-4492-a861-6c48c3bdf2a5",
+    "numeric-b916cd25-eead-410e-93a0-a822b6371ba0",
+    "numeric-bc72c6d5-50f2-44d3-9d75-3ef445c1879a",
+    "numeric-c7e3cdcc-357c-45ed-bdf6-ccca49f04a0e",
+    "numeric-c8fc4874-a4d6-49c5-96f6-7292b357f93c",
+    "numeric-cc5c7906-43d4-490a-b545-dd6f00a23d0e",
+    "numeric-db6ff86b-9e19-4eb4-aead-9e1cc48f7fee"
+  ]
+}

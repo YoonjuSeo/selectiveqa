@@ -1,0 +1,21 @@
+# make_manual_exclusions.py — 육안 판정 확정 손상 gold 추가 제외 (단계 0 보충)
+import json
+
+manual = {
+    "rule": "manual: 60~100자 구간 육안 판정 — 문장형(주어·서술어·종결어미) gold",
+    "date": "2026-08-17",
+    "judged_by": "diag_gold.py (b)목록 전건 육안 확인, 6/6 문장형 손상 확정",
+    "question_ids": [
+        "numeric-03fa95d6-fafe-47d2-a36c-745f2c24eeb1",
+        "numeric-1bdaea60-8090-4332-a156-4c1ba87450fc",
+        "numeric-dd3a6dff-8cf2-4957-a2af-9503bacae3ab",
+        "numeric-06ee52e8-c587-4d97-a5f6-b2cff23b3992",
+        "numeric-711df0f9-ba7e-48ac-afb1-8b8c188f62c9",
+        "numeric-b2edeaee-c83d-4030-a81a-16425cb43eac",
+    ],
+}
+manual["n"] = len(manual["question_ids"])
+with open("results/excluded_gold_v2_manual.json", "w", encoding="utf-8") as f:
+    json.dump(manual, f, ensure_ascii=False, indent=2)
+print(f"저장: results/excluded_gold_v2_manual.json ({manual['n']}건)")
+print("최종 제외 = excluded_gold_v2.json(24) ∪ manual(6) = 30건 / 응답가능 1,170건")

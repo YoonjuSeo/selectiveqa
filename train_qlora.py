@@ -73,7 +73,9 @@ class SFTDataset(Dataset):
         prompt_text = self.tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
-        target_text = build_target(row["gold_answer"]) + self.tokenizer.eos_token
+        target_text = build_target(row["gold_answer"],
+                                   answerable=row.get("answerable", True)
+                                   ) + self.tokenizer.eos_token
 
         prompt_ids = self.tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
         target_ids = self.tokenizer(target_text, add_special_tokens=False)["input_ids"]
@@ -110,6 +112,11 @@ def main():
     ap.add_argument("--config", default="config.yaml")
     ap.add_argument("--seed", type=int, default=None,
                     help="학습 시드 (본 실험: 42/43/44 각각 1회씩 실행. 미지정 시 config seed)")
+    ap.add_argument("--train-file", default="train.jsonl",
+                    help="학습 데이터 파일명 (M2: train_mix_r05/r10/r30.jsonl)")
+    ap.add_argument("--tag", default="",
+                    help="어댑터 이름 접미 (M2: _r05 등. 미지정 시 M1 호환)")
+    
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -150,7 +157,7 @@ def main():
     model = get_peft_model(model, lora)
     model.print_trainable_parameters()
 
-    train_path = Path(cfg["paths"]["processed_dir"]) / "train.jsonl"
+    train_path = Path(cfg["paths"]["processed_dir"]) / args.train_file
     dataset = SFTDataset(train_path, tokenizer, cfg["train"]["max_seq_len"])
     print(f"학습 데이터: {len(dataset)}건")
 
@@ -167,7 +174,7 @@ def main():
         seed=seed,
     )
 
-    adapter_dir = f'{cfg["model"]["adapter_dir"]}_s{seed}'   # 시드별 분리 저장
+    adapter_dir = f'{cfg["model"]["adapter_dir"]}{args.tag}_s{seed}'   # 시드별 분리 저장
     callbacks = []
     if cfg["train"].get("save_epoch_adapters", True):
         callbacks.append(EpochAdapterSaver(model, adapter_dir))

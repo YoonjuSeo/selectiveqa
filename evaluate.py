@@ -81,22 +81,16 @@ def is_correct(pred, gold, qtype, tol):
             return any(abs(p - g) <= tol * max(1.0, abs(g))
                        for g in gold_nums for p in pred_nums)
         return normalize(pred) == normalize(gold)
-    if qtype == "yes_no":
-        yes = {"예", "네", "맞습니다", "yes", "true", "가능"}
-        no = {"아니오", "아니요", "아닙니다", "no", "false", "불가능"}
 
-        def polarity(t):
-            t = normalize(t)
-            if any(w in t for w in map(normalize, yes)):
-                return 1
-            if any(w in t for w in map(normalize, no)):
-                return 0
-            return None
+    if qtype == "yes_no":
+        from polarity_v2 import polarity_v2 as polarity  # 최장 일치 우선 (단계 0 패치)
 
         gp, pp = polarity(gold), polarity(pred)
         if gp is not None and pp is not None:
             return gp == pp
         return normalize(pred) == normalize(gold)
+
+
     return normalize(pred) == normalize(gold)
 
 

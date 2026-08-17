@@ -1,0 +1,91 @@
+{
+  "note_h2": "H2 contrast 는 (table_lookup, numeric_reasoning) vs text_span 으로 정의되어 yes_no 채점 변경의 영향을 받지 않음 (판정 불변).",
+  "per_condition": {
+    "M0": {
+      "n_yes_no": 300,
+      "em_v1": 0.47,
+      "em_v2": 0.4766666666666667,
+      "delta_em": 0.00666666666666671,
+      "n_flip_polarity": 2,
+      "n_flip_correct": 2,
+      "n_flip_to_correct": 2,
+      "n_flip_to_wrong": 0,
+      "n_ambiguous_coexist": 2,
+      "n_string_fallback_v2": 149
+    },
+    "M1_s42": {
+      "n_yes_no": 300,
+      "em_v1": 0.9266666666666666,
+      "em_v2": 0.9266666666666666,
+      "delta_em": 0.0,
+      "n_flip_polarity": 0,
+      "n_flip_correct": 0,
+      "n_flip_to_correct": 0,
+      "n_flip_to_wrong": 0,
+      "n_ambiguous_coexist": 0,
+      "n_string_fallback_v2": 0
+    },
+    "M1_s43": {
+      "n_yes_no": 300,
+      "em_v1": 0.9233333333333333,
+      "em_v2": 0.9233333333333333,
+      "delta_em": 0.0,
+      "n_flip_polarity": 0,
+      "n_flip_correct": 0,
+      "n_flip_to_correct": 0,
+      "n_flip_to_wrong": 0,
+      "n_ambiguous_coexist": 0,
+      "n_string_fallback_v2": 0
+    },
+    "M1_s44": {
+      "n_yes_no": 300,
+      "em_v1": 0.9366666666666666,
+      "em_v2": 0.9366666666666666,
+      "delta_em": 0.0,
+      "n_flip_polarity": 0,
+      "n_flip_correct": 0,
+      "n_flip_to_correct": 0,
+      "n_flip_to_wrong": 0,
+      "n_ambiguous_coexist": 0,
+      "n_string_fallback_v2": 0
+    }
+  },
+  "yesno_ece": {
+    "M1_s42": {
+      "v1": {
+        "M0": 0.4227693623210867,
+        "M1": 0.05389280401605321,
+        "delta_ece": -0.36887655830503346
+      },
+      "v2": {
+        "M0": 0.41610269565442004,
+        "M1": 0.05389280401605321,
+        "delta_ece": -0.3622098916383668
+      }
+    },
+    "M1_s43": {
+      "v1": {
+        "M0": 0.4227693623210867,
+        "M1": 0.04366771573158852,
+        "delta_ece": -0.3791016465894982
+      },
+      "v2": {
+        "M0": 0.41610269565442004,
+        "M1": 0.04366771573158852,
+        "delta_ece": -0.37243497992283153
+      }
+    },
+    "M1_s44": {
+      "v1": {
+        "M0": 0.4227693623210867,
+        "M1": 0.04267249683260198,
+        "delta_ece": -0.3800968654884847
+      },
+      "v2": {
+        "M0": 0.41610269565442004,
+        "M1": 0.04267249683260198,
+        "delta_ece": -0.37343019882181805
+      }
+    }
+  }
+}

@@ -27,8 +27,13 @@ def build_messages(context: str, question: str) -> list:
     ]
 
 
-def build_target(gold_answer: str, evidence_span: str = None) -> str:
-    """학습용 정답 출력(JSON 문자열)을 만든다. 파일럿은 응답가능 질문만 학습."""
+def build_target(gold_answer: str, evidence_span: str = None,
+                 answerable: bool = True) -> str:
+    """학습용 정답 출력(JSON 문자열)을 만든다. answerable=False 면
+    시스템 프롬프트에 명시된 무응답 형식을 그대로 타깃으로 사용한다."""
+    if not answerable:
+        return json.dumps({"answerable": False, "answer": None,
+                           "evidence_span": None}, ensure_ascii=False)
     obj = {
         "answerable": True,
         "answer": gold_answer,
