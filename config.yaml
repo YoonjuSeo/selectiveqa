@@ -1,0 +1,40 @@
+# 본 실험 공통 설정 (파일럿 대비 변경: 7.8B / 응답불가능 300건 / 다중 시드 / bootstrap 10,000회)
+seed: 42                               # 데이터 분할·추론 등 공통 시드 (학습 시드는 train.seeds)
+
+paths:
+  raw_finance_dir: data/raw/finance    # AI Hub 금융·법률 기계독해(금융 파트) JSON 폴더
+  raw_numeric_dir: data/raw/numeric    # AI Hub 숫자연산 기계독해 JSON 폴더
+  processed_dir: data/processed        # train.jsonl / eval.jsonl 출력 위치
+  results_dir: results                 # 예측, 지표, 그림 출력 위치
+
+model:
+  base_model: LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct   # ★ 파일럿 2.4B → 본 실험 7.8B
+  adapter_dir: results/qlora_adapter   # 시드별로 {adapter_dir}_s{seed} 에 저장됨
+  revision: "0ff6b5ec7c13"             # ★ HF 저장소 커밋 해시 고정 (원격 코드 업데이트로부터 보호). null이면 최신
+
+data:
+  types: [text_span, table_lookup, numeric_reasoning, yes_no]
+  eval_per_type: 300                   # 유형별 응답가능 평가 건수
+  unanswerable_eval: 300               # ★ 응답 불가능 평가 건수 (신규)
+  train_size: 3000                     # M1 학습 건수 (응답가능만 — 설계서 §4.1)
+
+train:
+  seeds: [42, 43, 44]                  # ★ 학습 시드 3개 (설계서 §3) — train_qlora.py --seed 로 개별 실행
+  save_epoch_adapters: true            # ★ 에폭별 어댑터 저장 ({adapter_dir}_s{seed}_ep{N}) — 용량-반응 사후분석 대비, 판정에는 미사용
+  epochs: 2
+  lr: 2.0e-4
+  batch_size: 1                        # ★ 7.8B 메모리 고려 2→1
+  grad_accum: 16                       # ★ 실효 배치 16 유지 (파일럿과 동일)
+  max_seq_len: 2048
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+
+inference:
+  max_new_tokens: 128
+
+eval:
+  n_bins: 15                           # ECE 빈 수 (고정 경계, 파일럿과 동일)
+  n_bootstrap: 10000                   # ★ 파일럿 1,000 → 본 실험 10,000 (설계서 §7)
+  numeric_tolerance: 1.0e-4            # 숫자 연산형 수치 동등성 허용 오차
+  min_contrast: 0.03                   # H2 효과 크기 최소 기준 (설계서 §2)
