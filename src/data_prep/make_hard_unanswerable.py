@@ -30,7 +30,7 @@ from pathlib import Path
 
 import yaml
 
-from prepare_data import _norm  # 검증 정규화 — 기존 무결성 검사와 동일 원칙
+from data_prep.prepare_data import _norm  # 검증 정규화 — 기존 무결성 검사와 동일 원칙
 
 # --------------------------------------------------------------- 생성 파라미터
 MAX_REMOVE_FRAC = 0.5       # ER: 지문의 이 비율 초과 제거되면 폐기 (문맥 붕괴 방지)

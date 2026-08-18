@@ -30,7 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
-import evaluate as ev
+import evaluation.evaluate as ev
 
 GOLD_LEN_LIMIT = 100      # sensitivity_goldlen.py 와 동일 규칙 (동결)
 EXPECTED_N_BAD = 24       # 보고서 2.3절 기록과의 대조용

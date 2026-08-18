@@ -30,8 +30,8 @@ from pathlib import Path
 import numpy as np
 
 # 동결 로직 재사용: 정규화·ECE·로더는 evaluate.py 원본을 그대로 쓴다
-import evaluate as ev
-from polarity_v2 import polarity_v1, polarity_v2
+import evaluation.evaluate as ev
+from evaluation.polarity_v2 import polarity_v1, polarity_v2
 
 
 # --------------------------------------------------------------- 채점 유틸

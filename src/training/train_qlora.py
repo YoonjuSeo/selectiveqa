@@ -25,7 +25,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from prompts import build_messages, build_target
+from inference.prompts import build_messages, build_target
 
 
 class EpochAdapterSaver(TrainerCallback):

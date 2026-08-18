@@ -36,7 +36,7 @@ from pathlib import Path
 
 import yaml
 
-from prepare_data import _norm
+from data_prep.prepare_data import _norm
 
 RATIOS = [("r05", 150), ("r10", 300), ("r30", 900)]   # (태그, k) — 오름차순 필수
 MAX_TRIES = 30

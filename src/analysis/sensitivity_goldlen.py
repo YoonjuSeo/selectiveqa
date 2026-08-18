@@ -14,7 +14,7 @@ numeric 문항 24건) 제외 재판정 민감도.
 
 import glob
 
-from evaluate import (CONTRAST_NEG, CONTRAST_POS, bootstrap_ci, compute_stats,
+from evaluation.evaluate import (CONTRAST_NEG, CONTRAST_POS, bootstrap_ci, compute_stats,
                       join_pair, load_config, load_preds)
 
 GOLD_LEN_LIMIT = 100   # 이 길이를 넘는 gold는 손상으로 간주

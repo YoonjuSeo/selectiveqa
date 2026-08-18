@@ -83,7 +83,7 @@ def is_correct(pred, gold, qtype, tol):
         return normalize(pred) == normalize(gold)
 
     if qtype == "yes_no":
-        from polarity_v2 import polarity_v2 as polarity  # 최장 일치 우선 (단계 0 패치)
+        from evaluation.polarity_v2 import polarity_v2 as polarity  # 최장 일치 우선 (단계 0 패치)
 
         gp, pp = polarity(gold), polarity(pred)
         if gp is not None and pp is not None:

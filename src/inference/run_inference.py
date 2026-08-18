@@ -29,7 +29,7 @@ from peft import PeftModel
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-from prompts import build_messages, parse_model_output
+from inference.prompts import build_messages, parse_model_output
 
 
 def load_config(path="config.yaml"):

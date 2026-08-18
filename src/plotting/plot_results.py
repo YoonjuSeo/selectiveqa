@@ -125,7 +125,7 @@ def reliability_data(rows, n_bins):
 
 def plot_reliability(cfg, out_path):
     """M0와 대표 M1 시드의 응답가능 문항으로 유형×조건 diagram."""
-    import evaluate  # 채점 로직 재사용
+    import evaluation.evaluate as evaluate  # 채점 로직 재사용
 
     res_dir = Path(cfg["paths"]["results_dir"])
     types = cfg["data"]["types"]
