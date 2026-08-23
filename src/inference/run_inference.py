@@ -17,11 +17,13 @@ run_inference.py — M0(베이스) / M1(QLoRA) 조건으로 평가셋을 추론�
     ({"answerable": 같은 고정 토큰은 확률이 높아 전체 평균을 상향 편향시킴)
   - answer 구간 탐지 실패 시 생성 전체 평균으로 폴백하고 conf_scope에 기록
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # src/ 를 import 경로에 추가
 
 import argparse
 import json
 import math
-from pathlib import Path
 
 import torch
 import yaml
@@ -222,6 +224,12 @@ def main():
     ap.add_argument("--limit", type=int, default=None, help="디버깅용: 앞 N건만 추론")
     ap.add_argument("--fresh", action="store_true",
                     help="기존 출력을 무시하고 처음부터 다시 추론 (기본은 이어서 실행)")
+    ap.add_argument("--eval-file", default="eval.jsonl",
+                    help="processed_dir 내 평가 파일명 (기본: eval.jsonl)")
+    ap.add_argument("--adapter-dir", default=None,
+                    help="어댑터 경로 직접 지정 (에폭 어댑터·M2 용, --seed보다 우선)")
+    ap.add_argument("--out-tag", default=None,
+                    help="출력 파일 태그 (기본: condition 또는 condition_s{seed})")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -231,9 +239,13 @@ def main():
     if args.condition == "M1" and args.seed is not None:
         adapter_dir = f'{cfg["model"]["adapter_dir"]}_s{args.seed}'
         tag = f"M1_s{args.seed}"
+    if args.adapter_dir:
+        adapter_dir = args.adapter_dir
+    if args.out_tag:
+        tag = args.out_tag
     model, tokenizer = load_model(cfg, args.condition, adapter_dir)
 
-    eval_path = Path(cfg["paths"]["processed_dir"]) / "eval.jsonl"
+    eval_path = Path(cfg["paths"]["processed_dir"]) / args.eval_file
     rows = [json.loads(l) for l in open(eval_path, encoding="utf-8")]
     if args.limit:
         rows = rows[: args.limit]

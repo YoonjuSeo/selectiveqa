@@ -7,10 +7,12 @@ train_qlora.py — M1 조건: 응답가능 질문만으로 QLoRA 파인튜닝.
 
 프롬프트 토큰은 라벨 -100으로 마스킹하여 정답 JSON 부분만 학습한다.
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # src/ 를 import 경로에 추가
 
 import json
 import random
-from pathlib import Path
 
 import torch
 import yaml
@@ -116,6 +118,8 @@ def main():
                     help="학습 데이터 파일명 (M2: train_mix_r05/r10/r30.jsonl)")
     ap.add_argument("--tag", default="",
                     help="어댑터 이름 접미 (M2: _r05 등. 미지정 시 M1 호환)")
+    ap.add_argument("--epochs", type=float, default=None,
+                    help="에폭 수 재정의 (스모크: 1 등). 미지정 시 config 값 사용")
     
     args = ap.parse_args()
 
@@ -163,7 +167,7 @@ def main():
 
     args = TrainingArguments(
         output_dir=str(Path(cfg["paths"]["results_dir"]) / f"train_ckpt_s{seed}"),
-        num_train_epochs=cfg["train"]["epochs"],
+        num_train_epochs=args.epochs if args.epochs is not None else cfg["train"]["epochs"],
         learning_rate=float(cfg["train"]["lr"]),
         per_device_train_batch_size=cfg["train"]["batch_size"],
         gradient_accumulation_steps=cfg["train"]["grad_accum"],
