@@ -1,0 +1,75 @@
+{
+  "note": "hard UA 문항 단위 폐기 목록. 검수(C·B폐기) 확정분만 추가. 원본 hard_ua.jsonl 은 불변, 최종본은 hard_ua_final.jsonl.",
+  "created": "2026-08-23T12:25:07",
+  "items": [
+    {
+      "question_id": "numeric-cf34910d-fb39-4cbb-8ed2-83b62e423778-hd-er",
+      "judgement": "C",
+      "reason": "주제명 gold 재서술 잔존 — '규제의 핵심' 문장이 답을 명시 (표본 [13])"
+    },
+    {
+      "question_id": "numeric-d4db13da-63c3-4cdd-934a-5e5f8ca788c8-hd-er",
+      "judgement": "C",
+      "reason": "worked-example 역산 — 예시 계산(900만→500만 등)으로 요율 0.5% 복원 가능 (표본 [33])"
+    },
+    {
+      "question_id": "numeric-caa24385-2c87-4d89-8694-bef8d839df5b-hd-er",
+      "judgement": "C",
+      "reason": "접두 정규화 실패 — ㈜ NFKC 변형으로 '불스원' 잔존 검사 누락 (표본 [35])"
+    },
+    {
+      "question_id": "numeric-c6cd5012-608f-4fee-a53e-b0bb78e4a704-hd-ts",
+      "judgement": "B(폐기)",
+      "reason": "제목 라벨 연도 치환 — 묻는 사실이 상대 참조로 유일 대응, 라벨 계쟁 (표본 [25])"
+    },
+    {
+      "question_id": "numeric-e6a97501-951f-4ae3-aeab-bbe7bbb40557-hd-er",
+      "judgement": "C",
+      "reason": "주제명 재서술 — '가장 큰 변화는 소득증빙 강화, 이날부터 적용' 잔존 (전수 [06])"
+    },
+    {
+      "question_id": "numeric-3f3654b8-6daa-4624-9011-aff5cd4f1404-hd-er",
+      "judgement": "C",
+      "reason": "그룹 생략형 축약 잔존 — '금호아시아나'가 매각 주체로 명시 (전수 [10])"
+    },
+    {
+      "question_id": "numeric-154b35ef-868f-45fe-8d07-9da7edeac9f8-hd-er",
+      "judgement": "C",
+      "reason": "피연산자 잔존 — 2.6%·2.9% 잔존으로 0.3%p 도출, _norm 마침표 제거 오탐이 원인 (전수 [23])"
+    },
+    {
+      "question_id": "numeric-38009614-e200-4ea4-8601-b8e6c1314ec4-hd-er",
+      "judgement": "C",
+      "reason": "복합 직함 축약 잔존 — '김 부위원장' 미포착, easy재사용 건 (전수 [32])"
+    },
+    {
+      "question_id": "numeric-fb9097b2-4081-44fd-af51-01a83f8a670e-hd-ts",
+      "judgement": "B(폐기)",
+      "reason": "제목 라벨 연도 치환 — '2020년 주거종합계획'이 문서명이고 묻는 사실이 유일 대응 (TS스캔 [01])"
+    },
+    {
+      "question_id": "numeric-423eab9e-1e74-467a-93f6-5162ce5d6e80-hd-ts",
+      "judgement": "B(폐기)",
+      "reason": "제목 라벨 연도 치환 — 17−6=11개소가 유일 대응. 1차 표본 A 판정을 기준 정교화 후 재판정 (TS스캔 [02])"
+    },
+    {
+      "question_id": "numeric-08f2731b-035e-488a-baae-340b6ca138a5-hd-ts",
+      "judgement": "B(폐기)",
+      "reason": "제목 라벨 연도 치환 — 질문이 지문 첫 문장과 거의 일치, 19/28 유일 대응. easy재사용 건 (TS스캔 [03])"
+    }
+  ],
+  "last_applied": {
+    "date": "2026-08-23T15:23:14",
+    "original_n": 278,
+    "discarded_n": 11,
+    "final_n": 267,
+    "final_dist": {
+      "numeric_reasoning|hard_evidence_removal": 39,
+      "numeric_reasoning|hard_target_swap": 28,
+      "table_lookup|hard_evidence_removal": 42,
+      "table_lookup|hard_target_swap": 58,
+      "text_span|hard_evidence_removal": 100
+    },
+    "final_path": "data\\processed\\hard_ua_final.jsonl"
+  }
+}

@@ -34,17 +34,20 @@ evaluate.py (본 실험판) — 채점(EM/F1) + 보정 지표(ECE/ΔECE/Δconf) 
     - contrast_minprob      : min_token_prob 기반 confidence로 재계산한 contrast.
 ──────────────────────────────────────────────────────────────────────
 """
-
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # src/ 를 import 경로에 추가
 import argparse
 import json
 import re
 import string
 import unicodedata
 from collections import defaultdict
-from pathlib import Path
 
 import numpy as np
 import yaml
+
+from inference.prompts import parse_model_output 
 
 ANSWERABLE_TYPES_KEY = "types"          # config의 4개 응답가능 유형
 CONTRAST_POS = ("table_lookup", "numeric_reasoning")

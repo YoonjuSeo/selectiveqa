@@ -21,6 +21,9 @@ make_hard_unanswerable.py — hard unanswerable 평가 문항 생성기 (설계�
 검수 판정 범례 (unans_review.txt 관례 유지):
   A = 응답 불가능 확실 (합격)  /  B = 경계 사례 (재논의)  /  C = 지문만으로 답 가능 (불합격)
 """
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # src/ 를 import 경로에 추가
 import argparse
 import json
 import random
@@ -83,15 +86,19 @@ def gold_variants(gold):
 
 
 def split_segments(context):
-    """지문을 근거 제거 단위로 분할: 줄 → 문장(종결부 기준).
-    표 형태 줄(table_lookup 지문)은 줄 단위 그대로 유지된다."""
+    """지문을 근거 제거 단위로 분할: <table> 블록은 통째로 한 세그먼트(원자),
+    나머지는 줄 → 문장. (검수 [02]: 표 내부 분할로 인한 구조 훼손 방지)"""
     segs = []
-    for line in context.split("\n"):
-        line = line.rstrip()
-        if not line:
+    parts = re.split(r"(<table>.*?</table>)", context, flags=re.DOTALL)
+    for part in parts:
+        if part.startswith("<table>"):
+            segs.append(part)
             continue
-        parts = re.split(r"(?<=[.!?。])\s+", line)
-        segs.extend(p for p in parts if p.strip())
+        for line in part.split("\n"):
+            line = line.rstrip()
+            if not line:
+                continue
+            segs.extend(p for p in re.split(r"(?<=[.!?。])\s+", line) if p.strip())
     return segs
 
 
@@ -122,9 +129,16 @@ def make_evidence_removal(ex):
     name_m = re.match(r"([가-힣])[가-힣]{1,2}(?=\s|$)", gold_raw)
     if name_m:
         variants |= {_norm(name_m.group(1) + t) for t in PERSON_TITLES}
-    # (3) 다단어 gold의 구성 토큰 (의역 잔존 차단, 과잉 제거는 폐기로 흡수)
+    # (3) 다단어 gold의 구성 토큰 — 조사 제거 어간까지 검사 (검수 [42])
     if " " in gold_raw:
-        variants |= {_norm(tok) for tok in gold_raw.split() if len(_norm(tok)) >= 2}
+        _JOSA = re.compile(r"(의|은|는|이|가|을|를|에서|에게|에|와|과|으로|로|도|만|부터|까지)$")
+        for tok in gold_raw.split():
+            t = _norm(tok)
+            if len(t) >= 2:
+                variants.add(t)
+                stem = _JOSA.sub("", t)
+                if len(stem) >= 2:
+                    variants.add(stem)
     variants = {v for v in variants if v}
 
     segs = split_segments(ex["context"])
@@ -202,8 +216,17 @@ def make_target_swap(ex, entity_pool, rng):
 
     파일럿 검수 반영: 같은 값의 전체 출현을 일괄 치환([03] — 첫 출현만 바꾸면
     답을 결정하는 두 번째 출현이 남아 응답 가능해질 수 있음).
+    본생성 50건 검수 반영:
+      - 개체 치환 전면 제외 — 잔존 앵커(인명·인용 문자열·제한자 조합)로
+        대상이 유일 특정되어 라벨 계쟁 다발 (검수 [26][50][13][09][49][40][48])
+      - 상대 시점어 질문 제외 — '지난달' 등이 지문 데이터에 앵커되면
+        절대 시점 치환이 무력화됨 (검수 [19])
     """
     ctx_n = _norm(ex["context"])
+    # 상대 시점어 필터 (검수 [19])
+    if re.search(r"지난\s?[달해주]|작년|올해|이날|어제|전날", ex["question"]):
+        return None, "relative_time_anchor"
+
     targets = find_swap_targets(ex["question"])
     if not targets:
         return None, "no_swappable_target"
@@ -211,24 +234,17 @@ def make_target_swap(ex, entity_pool, rng):
     unit = {"year": "년", "quarter": "분기", "month": "월", "rank": "위"}
     rng.shuffle(targets)
     for kind, orig, (s, e) in targets:
+        if kind == "entity":
+            continue  # 개체 치환 전면 제외 (검수: 유일 지시 잔존 → 라벨 계쟁)
         if _norm(orig) not in ctx_n:
             continue  # 원대상이 지문에 존재해야 '근접 부재' 성립
-        if kind == "entity":
-            cands = [c for c in entity_pool
-                     if c != orig and c not in ex["context"]]
-            rng.shuffle(cands)
-            cands = cands[:10]
-        else:
-            cands = _swap_candidates(kind, orig)
-            rng.shuffle(cands)
+        cands = _swap_candidates(kind, orig)
+        rng.shuffle(cands)
         for cand in cands:
             if _norm(cand) in ctx_n:
                 continue
-            if kind == "entity":
-                new_q = ex["question"].replace(orig, cand)      # 전체 출현 치환
-            else:
-                new_q = re.sub(re.escape(orig) + f"(?={unit[kind]})",
-                               cand, ex["question"])            # 단위 결합 전체 치환
+            new_q = re.sub(re.escape(orig) + f"(?={unit[kind]})",
+                           cand, ex["question"])            # 단위 결합 전체 치환
             if new_q == ex["question"]:
                 continue
             return {
@@ -369,8 +385,14 @@ def _make_row(ex, suffix, ua_kind, context=None, question=None, gen_meta=None):
 def write_review(rows, path, n_sample, rng):
     sample = rows if len(rows) <= n_sample else rng.sample(rows, n_sample)
     with open(path, "w", encoding="utf-8") as f:
-        f.write("판정 범례: A=응답불가 확실 / B=경계(재논의) / C=지문만으로 답 가능(불합격)\n")
-        f.write("합격 기준(설계서 5.2절): C 0건\n\n")
+        f.write("판정 범례:\n")
+        f.write("  C      = 남은 지문이 질문에 대한 답을 명시하거나 정합적으로 귀속시킴\n")
+        f.write("  B(유지) = 답 불성립이나 인접 정보가 특정 오답을 강하게 유도 (경계 기록, 문항 유지)\n")
+        f.write("  B(폐기) = 라벨 계쟁 — 잔존 제한자(인명·인용 문자열·제한자 조합)만으로\n")
+        f.write("           대상이 유일 특정되어, 무응답과 수선 응답 중 규범적 답 판별 불가\n")
+        f.write("  A      = 답 불성립 + 강한 유도 없음\n")
+        f.write("합격 기준(설계서 5.2절): C 0건 · B(폐기)는 문항 단위 폐기·대체\n\n")
+
         for i, r in enumerate(sample, 1):
             f.write("=" * 70 + "\n")
             f.write(f"[{i:02d}] QID: {r['question_id']}  |  원유형: {r['orig_type']}"
