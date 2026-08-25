@@ -165,7 +165,7 @@ def main():
     dataset = SFTDataset(train_path, tokenizer, cfg["train"]["max_seq_len"])
     print(f"학습 데이터: {len(dataset)}건")
 
-    args = TrainingArguments(
+    targs = TrainingArguments(
         output_dir=str(Path(cfg["paths"]["results_dir"]) / f"train_ckpt_s{seed}"),
         num_train_epochs=args.epochs if args.epochs is not None else cfg["train"]["epochs"],
         learning_rate=float(cfg["train"]["lr"]),
@@ -185,7 +185,7 @@ def main():
 
     trainer = Trainer(
         model=model,
-        args=args,
+        args=targs,
         train_dataset=dataset,
         data_collator=lambda b: collate(b, tokenizer.pad_token_id),
         callbacks=callbacks,
