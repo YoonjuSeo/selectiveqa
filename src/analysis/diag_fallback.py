@@ -21,4 +21,6 @@ def diag(path):
 
 for s in (42, 43, 44):
     diag(f"results/preds_M2_r05_s{s}.jsonl")
-diag("results/preds_M1_s42.jsonl")
+    diag("results/preds_M1_s42.jsonl")
+    diag("results/preds_M2_r10_s42.jsonl")
+    diag("results/preds_M2_r30_s42.jsonl")

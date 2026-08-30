@@ -11,9 +11,9 @@ def load(p):
     return [json.loads(l) for l in open(p, encoding="utf-8")]
 
 base = load("data/processed/train.jsonl")
-mix = load("data/processed/train_mix_r05.jsonl")
+mix = load("data/processed/train_mix_r30.jsonl")
 
-print(f"train.jsonl: {len(base)}건 · train_mix_r05.jsonl: {len(mix)}건")
+print(f"train.jsonl: {len(base)}건 · train_mix_r30.jsonl: {len(mix)}건")
 mix_ans = [r for r in mix if r.get("answerable", True)]
 mix_ua = [r for r in mix if not r.get("answerable", True)]
 print(f"mix 구성: 응답가능 {len(mix_ans)} + 무응답 {len(mix_ua)} (기대: 2850 + 150)\n")
