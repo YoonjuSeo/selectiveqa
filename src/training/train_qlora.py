@@ -27,8 +27,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from inference.prompts import build_messages, build_target
-
+from inference.prompts import build_messages, build_target, apply_template
 
 class EpochAdapterSaver(TrainerCallback):
     """에폭 종료마다 LoRA 어댑터만 별도 저장한다.
@@ -72,9 +71,7 @@ class SFTDataset(Dataset):
     def __getitem__(self, idx):
         row = self.rows[idx]
         messages = build_messages(row["context"], row["question"])
-        prompt_text = self.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
+        prompt_text = apply_template(self.tokenizer, messages, self.enable_thinking)
         target_text = build_target(row["gold_answer"],
                                    answerable=row.get("answerable", True)
                                    ) + self.tokenizer.eos_token
@@ -162,7 +159,8 @@ def main():
     model.print_trainable_parameters()
 
     train_path = Path(cfg["paths"]["processed_dir"]) / args.train_file
-    dataset = SFTDataset(train_path, tokenizer, cfg["train"]["max_seq_len"])
+    dataset = SFTDataset(train_path, tokenizer, cfg["train"]["max_seq_len"],
+                     enable_thinking=cfg["model"].get("enable_thinking"))
     print(f"학습 데이터: {len(dataset)}건")
 
     targs = TrainingArguments(

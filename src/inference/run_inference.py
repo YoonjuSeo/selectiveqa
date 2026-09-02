@@ -31,7 +31,7 @@ from peft import PeftModel
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-from inference.prompts import build_messages, parse_model_output
+from inference.prompts import build_messages, parse_model_output, apply_template
 
 
 def load_config(path="config.yaml"):
@@ -141,11 +141,9 @@ def answer_token_range(tokenizer, gen_ids, gen_text, answer_value):
 
 
 @torch.no_grad()
-def predict_one(model, tokenizer, row, max_new_tokens):
+def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None):
     messages = build_messages(row["context"], row["question"])
-    prompt = tokenizer.apply_chat_template(
-        messages, tokenize=False, add_generation_prompt=True
-    )
+    prompt = apply_template(tokenizer, messages, enable_thinking)
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
     out = model.generate(
@@ -270,7 +268,7 @@ def main():
     with open(out_path, "a", encoding="utf-8") as f:
         for row in tqdm(todo, desc=f"추론 {args.condition}",
                         initial=n_done, total=n_done + len(todo)):
-            pred = predict_one(model, tokenizer, row, cfg["inference"]["max_new_tokens"])
+            pred = predict_one(model, tokenizer, row, cfg["inference"]["max_new_tokens"],enable_thinking=cfg["model"].get("enable_thinking"))
             if pred["conf_scope"] != "answer_span":
                 n_fallback += 1
             record = {

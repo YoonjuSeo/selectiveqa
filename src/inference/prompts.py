@@ -96,3 +96,12 @@ def parse_model_output(text: str) -> dict:
         }
     # 파싱 실패 시 원문 전체를 답으로 간주 (채점 시 대부분 오답 처리됨)
     return {"answerable": None, "answer": text, "parse_ok": False}
+
+def apply_template(tokenizer, messages, enable_thinking=None):
+    """학습·추론 공용 템플릿 적용. Qwen3: enable_thinking=False 로 non-thinking 고정.
+    None 이면 kwarg 자체를 넘기지 않아 EXAONE 프롬프트가 기존과 바이트 단위로 동일."""
+    kw = {}
+    if enable_thinking is not None:
+        kw["enable_thinking"] = enable_thinking
+    return tokenizer.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True, **kw)

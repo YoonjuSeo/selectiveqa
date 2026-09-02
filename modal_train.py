@@ -23,6 +23,7 @@ image = (
     .pip_install_from_requirements("requirements.txt")
     # 코드/설정/데이터를 컨테이너의 /root/proj 아래에 동일 구조로 복사
     .add_local_file("config.yaml", "/root/proj/config.yaml")
+    .add_local_file("config_qwen3.yaml", "/root/proj/config_qwen3.yaml")
     .add_local_dir("src", "/root/proj/src")
     .add_local_dir("data/processed", "/root/proj/data/processed")
 )
@@ -41,7 +42,7 @@ hf_cache_vol = modal.Volume.from_name("hf-cache", create_if_missing=True)
     },
     timeout=6 * 60 * 60,           # 6시간 (본 학습 대비. 스모크는 금방 끝남)
 )
-def train(train_file: str, tag: str, seed: int | None, epochs: float | None):
+def train(train_file: str, tag: str, seed: int | None, epochs: float | None, config: str):
     import os
     import subprocess
     import sys
@@ -50,6 +51,7 @@ def train(train_file: str, tag: str, seed: int | None, epochs: float | None):
 
     cmd = [
         sys.executable, "src/training/train_qlora.py",
+        "--config", config,
         "--train-file", train_file,
         "--tag", tag,
     ]
@@ -73,7 +75,8 @@ def main(
     tag: str = "_smoke",
     seed: int = None,
     epochs: float = None,
+    config: str = "config.yaml", 
 ):
-    call = train.spawn(train_file=train_file, tag=tag, seed=seed, epochs=epochs)
+    call = train.spawn(train_file=train_file, tag=tag, seed=seed, epochs=epochs, config=config)
     print(f"작업 제출 완료 (function call id: {call.object_id})")
     print("진행 상황: https://modal.com/apps → selectiveqa-train → App Logs")

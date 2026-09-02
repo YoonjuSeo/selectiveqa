@@ -30,6 +30,7 @@ image = (
         "bitsandbytes==0.50.0",
     )
     .add_local_file("config.yaml", "/root/proj/config.yaml")
+    .add_local_file("config_qwen3.yaml", "/root/proj/config_qwen3.yaml")
     .add_local_dir("src", "/root/proj/src")
     .add_local_dir("data/processed", "/root/proj/data/processed")
 )
@@ -48,10 +49,10 @@ hf_cache_vol = modal.Volume.from_name("hf-cache", create_if_missing=True)
         "/root/proj/results": results_vol,
         "/root/.cache/huggingface": hf_cache_vol,
     },
-    timeout=4 * 60 * 60,
+    timeout=6 * 60 * 60,
 )
 def infer(condition: str, eval_file: str, adapter_dir: str | None,
-          out_tag: str | None, seed: int | None, limit: int | None, fresh: bool):
+          out_tag: str | None, seed: int | None, limit: int | None, fresh: bool, config: str):
     import os
     import subprocess
     import sys
@@ -60,6 +61,7 @@ def infer(condition: str, eval_file: str, adapter_dir: str | None,
 
     cmd = [
         sys.executable, "src/inference/run_inference.py",
+        "--config", config,
         "--condition", condition,
         "--eval-file", eval_file,
     ]
@@ -95,16 +97,18 @@ def main(
     limit: int = None,
     fresh: bool = False,
     wait: bool = False,
+    config: str = "config.yaml",  
 ):
     if wait:
         # 스모크용: 로그를 터미널에서 직접 보며 완료까지 대기 (detach 불필요)
         infer.remote(condition=condition, eval_file=eval_file,
                      adapter_dir=adapter_dir, out_tag=out_tag,
-                     seed=seed, limit=limit, fresh=fresh)
+                     seed=seed, limit=limit, fresh=fresh, config=config)   
     else:
         # 본 실행용: 제출 후 즉시 종료 (반드시 --detach와 함께)
         call = infer.spawn(condition=condition, eval_file=eval_file,
                            adapter_dir=adapter_dir, out_tag=out_tag,
-                           seed=seed, limit=limit, fresh=fresh)
+                           seed=seed, limit=limit, fresh=fresh,
+                           config=config)   
         print(f"작업 제출 완료 (function call id: {call.object_id})")
         print("진행 상황: https://modal.com/apps → selectiveqa-infer → App Logs")

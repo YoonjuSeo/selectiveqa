@@ -34,13 +34,14 @@ results_vol = modal.Volume.from_name("selectiveqa-results")
     volumes={"/root/proj/results": results_vol},
     timeout=4 * 60 * 60,
 )
-def evaluate(h4_signal: str, n_boot: int | None, tag: str):
+def evaluate(h4_signal: str, n_boot: int | None, tag: str, config: str):
     import os
     import subprocess
     import sys
 
     os.chdir("/root/proj")
     cmd = [sys.executable, "src/evaluation/evaluate_followup.py",
+           "--config", config, 
            "--h4-signal", h4_signal, "--tag", tag]
     if n_boot is not None:
         cmd += ["--n-boot", str(n_boot)]
@@ -55,7 +56,7 @@ def evaluate(h4_signal: str, n_boot: int | None, tag: str):
 
 
 @app.local_entrypoint()
-def main(h4_signal: str = "m1_conf", n_boot: int = None, tag: str = "r05"):
-    call = evaluate.spawn(h4_signal=h4_signal, n_boot=n_boot, tag=tag)
+def main(h4_signal: str = "m1_conf", n_boot: int = None, tag: str = "r05", config: str = "config.yaml"): 
+    call = evaluate.spawn(h4_signal=h4_signal, n_boot=n_boot, tag=tag , config=config)
     print(f"작업 제출 완료 (function call id: {call.object_id})")
     print("진행 상황: modal.com 대시보드 → selectiveqa-eval → App Logs")
