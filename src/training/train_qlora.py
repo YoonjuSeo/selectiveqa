@@ -29,6 +29,7 @@ from transformers import (
 
 from inference.prompts import build_messages, build_target, apply_template
 
+
 class EpochAdapterSaver(TrainerCallback):
     """에폭 종료마다 LoRA 어댑터만 별도 저장한다.
 
@@ -57,9 +58,10 @@ def load_config(path="config.yaml"):
 class SFTDataset(Dataset):
     """프롬프트(마스킹) + 정답 JSON(학습 대상) 형태의 causal LM 데이터셋."""
 
-    def __init__(self, jsonl_path, tokenizer, max_len):
+    def __init__(self, jsonl_path, tokenizer, max_len, enable_thinking=None):
         self.tokenizer = tokenizer
         self.max_len = max_len
+        self.enable_thinking = enable_thinking
         self.rows = []
         with open(jsonl_path, encoding="utf-8") as f:
             for line in f:
@@ -72,9 +74,7 @@ class SFTDataset(Dataset):
         row = self.rows[idx]
         messages = build_messages(row["context"], row["question"])
         prompt_text = apply_template(self.tokenizer, messages, self.enable_thinking)
-        target_text = build_target(row["gold_answer"],
-                                   answerable=row.get("answerable", True)
-                                   ) + self.tokenizer.eos_token
+        target_text = build_target(row["gold_answer"])
 
         prompt_ids = self.tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
         target_ids = self.tokenizer(target_text, add_special_tokens=False)["input_ids"]

@@ -72,7 +72,7 @@ def train(train_file: str, tag: str, seed: int | None, epochs: float | None, con
 @app.local_entrypoint()
 def main(
     train_file: str = "train_smoke.jsonl",
-    tag: str = "_smoke",
+    tag: str = "",
     seed: int = None,
     epochs: float = None,
     config: str = "config.yaml", 
