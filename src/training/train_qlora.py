@@ -74,7 +74,7 @@ class SFTDataset(Dataset):
         row = self.rows[idx]
         messages = build_messages(row["context"], row["question"])
         prompt_text = apply_template(self.tokenizer, messages, self.enable_thinking)
-        target_text = build_target(row["gold_answer"])
+        target_text = build_target(row["gold_answer"],answerable=row.get("answerable", True)) + self.tokenizer.eos_token
 
         prompt_ids = self.tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
         target_ids = self.tokenizer(target_text, add_special_tokens=False)["input_ids"]
