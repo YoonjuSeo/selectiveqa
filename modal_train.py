@@ -24,6 +24,7 @@ image = (
     # 코드/설정/데이터를 컨테이너의 /root/proj 아래에 동일 구조로 복사
     .add_local_file("config.yaml", "/root/proj/config.yaml")
     .add_local_file("config_qwen3.yaml", "/root/proj/config_qwen3.yaml")
+    .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
     .add_local_dir("src", "/root/proj/src")
     .add_local_dir("data/processed", "/root/proj/data/processed")
 )
@@ -40,6 +41,7 @@ hf_cache_vol = modal.Volume.from_name("hf-cache", create_if_missing=True)
         "/root/proj/results": results_vol,        # config의 results_dir와 일치
         "/root/.cache/huggingface": hf_cache_vol,  # 7.8B 모델 재다운로드 방지
     },
+    secrets=[modal.Secret.from_name("huggingface")], 
     timeout=6 * 60 * 60,           # 6시간 (본 학습 대비. 스모크는 금방 끝남)
 )
 def train(train_file: str, tag: str, seed: int | None, epochs: float | None, config: str):

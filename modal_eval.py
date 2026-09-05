@@ -21,6 +21,8 @@ image = (
     modal.Image.debian_slim(python_version="3.12")
     .pip_install("numpy", "pyyaml", "matplotlib")
     .add_local_file("config.yaml", "/root/proj/config.yaml")
+    .add_local_file("config_qwen3.yaml", "/root/proj/config_qwen3.yaml")
+    .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
     .add_local_dir("src", "/root/proj/src")
 )
 

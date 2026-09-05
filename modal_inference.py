@@ -31,6 +31,7 @@ image = (
     )
     .add_local_file("config.yaml", "/root/proj/config.yaml")
     .add_local_file("config_qwen3.yaml", "/root/proj/config_qwen3.yaml")
+    .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
     .add_local_dir("src", "/root/proj/src")
     .add_local_dir("data/processed", "/root/proj/data/processed")
 )
@@ -49,6 +50,7 @@ hf_cache_vol = modal.Volume.from_name("hf-cache", create_if_missing=True)
         "/root/proj/results": results_vol,
         "/root/.cache/huggingface": hf_cache_vol,
     },
+    secrets=[modal.Secret.from_name("huggingface")],
     timeout=6 * 60 * 60,
 )
 def infer(condition: str, eval_file: str, adapter_dir: str | None,

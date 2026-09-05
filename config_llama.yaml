@@ -1,0 +1,40 @@
+# 본 실험 공통 설정 (파일럿 대비 변경: 7.8B / 응답불가능 300건 / 다중 시드 / bootstrap 10,000회)
+seed: 42                               # 데이터 분할·추론 등 공통 시드 (학습 시드는 train.seeds)
+
+paths:
+  raw_finance_dir: data/raw/finance    # AI Hub 금융·법률 기계독해(금융 파트) JSON 폴더
+  raw_numeric_dir: data/raw/numeric    # AI Hub 숫자연산 기계독해 JSON 폴더
+  results_dir: results/llama
+  processed_dir: data/processed
+
+model:
+  base_model: meta-llama/Llama-3.1-8B-Instruct
+  adapter_dir: results/llama/qlora_adapter
+  revision: "0e9e39f249a16976918f6564b8830bc894c89659"
+
+data:
+  types: [text_span, table_lookup, numeric_reasoning, yes_no]
+  eval_per_type: 300                   # 유형별 응답가능 평가 건수
+  unanswerable_eval: 300               # ★ 응답 불가능 평가 건수 (신규)
+  train_size: 3000                     # M1 학습 건수 (응답가능만 — 설계서 §4.1)
+
+train:
+  seeds: 42                  # ★ 학습 시드 train_qlora.py --seed 로 개별 실행
+  epochs: 2
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  max_seq_len: 2048
+  batch_size: 2
+  grad_accum: 8
+  lr: 2.0e-4
+  save_epoch_adapters: true
+
+inference:
+  max_new_tokens: 128
+
+eval:
+  n_bins: 15                           # ECE 빈 수 (고정 경계, 파일럿과 동일)
+  n_bootstrap: 10000                   # ★ 파일럿 1,000 → 본 실험 10,000 (설계서 §7)
+  numeric_tolerance: 1.0e-4            # 숫자 연산형 수치 동등성 허용 오차
+  min_contrast: 0.03                   # H2 효과 크기 최소 기준 (설계서 §2)
