@@ -442,6 +442,8 @@ def main():
     out = {"per_seed": results, "seed_summary": summary,
            "risk_coverage": rc_store,
            "settings": {"h4_signal": args.h4_signal, "n_boot": n_boot,
+                        "m2_glob": args.m2_glob,
+                        "m2_files": {s: str(m2_files[s]) for s in seeds},
                         "excluded": sorted(excluded),
                         "ua_rule": "easy=unans_* / hard=*-hd-{er,ts}"}}
     out_path = res_dir / f"metrics_followup_{args.tag}.json"

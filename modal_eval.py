@@ -7,7 +7,7 @@ modal_eval.py — evaluate_followup.py를 Modal CPU 컨테이너에서 실행 (G
   modal volume put selectiveqa-results .\\results\\excluded_gold_v2_manual.json excluded_gold_v2_manual.json
 
 실행:
-  modal run --detach modal_eval.py --h4-signal m1_conf
+  modal run --detach modal_eval.py --config config_qwen3.yaml --tag r30 --h4-signal m1_conf
 
 결과 회수 (완료 후):
   modal volume get selectiveqa-results metrics_followup_r05.json .\\results
@@ -36,15 +36,15 @@ results_vol = modal.Volume.from_name("selectiveqa-results")
     volumes={"/root/proj/results": results_vol},
     timeout=4 * 60 * 60,
 )
-def evaluate(h4_signal: str, n_boot: int | None, tag: str, config: str):
+def evaluate(h4_signal: str, n_boot: int | None, tag: str, config: str, m2_glob: str):
     import os
     import subprocess
     import sys
 
     os.chdir("/root/proj")
     cmd = [sys.executable, "src/evaluation/evaluate_followup.py",
-           "--config", config, 
-           "--h4-signal", h4_signal, "--tag", tag]
+           "--config", config, "--h4-signal", h4_signal,
+           "--tag", tag, "--m2-glob", m2_glob]
     if n_boot is not None:
         cmd += ["--n-boot", str(n_boot)]
     print("실행:", " ".join(cmd))
@@ -58,7 +58,10 @@ def evaluate(h4_signal: str, n_boot: int | None, tag: str, config: str):
 
 
 @app.local_entrypoint()
-def main(h4_signal: str = "m1_conf", n_boot: int = None, tag: str = "r05", config: str = "config.yaml"): 
-    call = evaluate.spawn(h4_signal=h4_signal, n_boot=n_boot, tag=tag , config=config)
+def main(h4_signal: str = "m1_conf", n_boot: int = None, tag: str = "r05",
+         config: str = "config.yaml", m2_glob: str = None):
+    m2_glob = m2_glob or f"preds_M2_{tag}_s*.jsonl"   # tag와 항상 일치
+    call = evaluate.spawn(h4_signal=h4_signal, n_boot=n_boot,
+                          tag=tag, config=config, m2_glob=m2_glob)
     print(f"작업 제출 완료 (function call id: {call.object_id})")
     print("진행 상황: modal.com 대시보드 → selectiveqa-eval → App Logs")

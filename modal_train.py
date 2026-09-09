@@ -42,7 +42,7 @@ hf_cache_vol = modal.Volume.from_name("hf-cache", create_if_missing=True)
         "/root/.cache/huggingface": hf_cache_vol,  # 7.8B 모델 재다운로드 방지
     },
     secrets=[modal.Secret.from_name("huggingface")], 
-    timeout=6 * 60 * 60,           # 6시간 (본 학습 대비. 스모크는 금방 끝남)
+    timeout=8 * 60 * 60,           # 8시간 (본 학습 대비. 스모크는 금방 끝남)
 )
 def train(train_file: str, tag: str, seed: int | None, epochs: float | None, config: str):
     import os
