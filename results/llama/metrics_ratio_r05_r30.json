@@ -1,0 +1,156 @@
+{
+  "per_seed": {
+    "42": {
+      "n": {
+        "hard": 267,
+        "easy": 300,
+        "ans": 1170
+      },
+      "hard": {
+        "rate_a": 0.3258426966292135,
+        "rate_b": 0.31835205992509363,
+        "delta": -0.0074906367041198685,
+        "lo": -0.041198501872659166,
+        "hi": 0.026217228464419484
+      },
+      "easy": {
+        "rate_a": 0.9866666666666667,
+        "rate_b": 0.9933333333333333,
+        "delta": 0.006666666666666599,
+        "lo": 0.0,
+        "hi": 0.01666666666666672
+      },
+      "ans": {
+        "rate_a": 0.0,
+        "rate_b": 0.0,
+        "delta": 0.0,
+        "lo": 0.0,
+        "hi": 0.0
+      },
+      "verdict": "스위치"
+    },
+    "43": {
+      "n": {
+        "hard": 267,
+        "easy": 300,
+        "ans": 1170
+      },
+      "hard": {
+        "rate_a": 0.15355805243445692,
+        "rate_b": 0.3857677902621723,
+        "delta": 0.23220973782771537,
+        "lo": 0.17977528089887643,
+        "hi": 0.28464419475655434
+      },
+      "easy": {
+        "rate_a": 0.98,
+        "rate_b": 0.9966666666666667,
+        "delta": 0.01666666666666672,
+        "lo": 0.0033333333333332993,
+        "hi": 0.033333333333333326
+      },
+      "ans": {
+        "rate_a": 0.0,
+        "rate_b": 0.0,
+        "delta": 0.0,
+        "lo": 0.0,
+        "hi": 0.0
+      },
+      "verdict": "다이얼"
+    },
+    "44": {
+      "n": {
+        "hard": 267,
+        "easy": 300,
+        "ans": 1170
+      },
+      "hard": {
+        "rate_a": 0.17228464419475656,
+        "rate_b": 0.22846441947565543,
+        "delta": 0.056179775280898875,
+        "lo": 0.02247191011235955,
+        "hi": 0.0936329588014981
+      },
+      "easy": {
+        "rate_a": 0.9833333333333333,
+        "rate_b": 0.9933333333333333,
+        "delta": 0.010000000000000009,
+        "lo": 0.0,
+        "hi": 0.023333333333333317
+      },
+      "ans": {
+        "rate_a": 0.0,
+        "rate_b": 0.0,
+        "delta": 0.0,
+        "lo": 0.0,
+        "hi": 0.0
+      },
+      "verdict": "스위치"
+    }
+  },
+  "verdicts": {
+    "42": "스위치",
+    "43": "다이얼",
+    "44": "스위치"
+  },
+  "overall": "스위치 (조건부)",
+  "seed_span": {
+    "r05": 0.1722846441947566,
+    "r30": 0.15730337078651685
+  },
+  "settings": {
+    "tag_a": "r05",
+    "tag_b": "r30",
+    "delta": 0.1,
+    "n_boot": 10000,
+    "boot_seed": 42,
+    "files_a": {
+      "42": "results\\llama\\preds_M2_r05_s42.jsonl",
+      "43": "results\\llama\\preds_M2_r05_s43.jsonl",
+      "44": "results\\llama\\preds_M2_r05_s44.jsonl"
+    },
+    "files_b": {
+      "42": "results\\llama\\preds_M2_r30_s42.jsonl",
+      "43": "results\\llama\\preds_M2_r30_s43.jsonl",
+      "44": "results\\llama\\preds_M2_r30_s44.jsonl"
+    },
+    "excluded": [
+      "2026-08-17",
+      "diag_gold.py (b)목록 전건 육안 확인, 6/6 문장형 손상 확정",
+      "gold_answerable and len(str(gold_answer)) > 100",
+      "manual: 60~100자 구간 육안 판정 — 문장형(주어·서술어·종결어미) gold",
+      "numeric-00482e52-d291-428f-b60a-9e54a6bb1abd",
+      "numeric-03fa95d6-fafe-47d2-a36c-745f2c24eeb1",
+      "numeric-06ee52e8-c587-4d97-a5f6-b2cff23b3992",
+      "numeric-06f3fb76-2290-4ba1-99f6-cbe94335f569",
+      "numeric-08ead269-f5ae-4c97-96a2-3049bdddb7b7",
+      "numeric-0fcd319a-0416-46e7-be67-fa78f963b730",
+      "numeric-18e6c8ab-90e2-445a-819c-b1d01d511fda",
+      "numeric-1bdaea60-8090-4332-a156-4c1ba87450fc",
+      "numeric-1cff87db-2736-44a0-840f-ad77891b8bd3",
+      "numeric-2b364c9b-cc47-4d94-8629-d94426a7e881",
+      "numeric-2b3f5858-e4c4-4f06-94ac-514347152b63",
+      "numeric-37a4832b-13e2-4dcd-a24f-c56ecb26d512",
+      "numeric-3ea659ed-4036-4ba3-879b-e7a1832fa52e",
+      "numeric-555c2d3b-d0f0-4161-bfc1-fc18d15a5539",
+      "numeric-6216455a-d682-4f6f-922d-c4c8fa23f755",
+      "numeric-711df0f9-ba7e-48ac-afb1-8b8c188f62c9",
+      "numeric-81a0e49d-2d34-40ec-9926-0ff9787b0d29",
+      "numeric-8fe5334a-c9d2-4b5e-859c-099349263f9a",
+      "numeric-9083751f-1eba-495a-bd30-5241ff025d83",
+      "numeric-91ea7702-6ee2-4889-bc56-73736b2faf00",
+      "numeric-ad2d2da3-0786-4887-a620-2419fcd5d6fa",
+      "numeric-ad9a7017-1262-4492-a861-6c48c3bdf2a5",
+      "numeric-b2edeaee-c83d-4030-a81a-16425cb43eac",
+      "numeric-b916cd25-eead-410e-93a0-a822b6371ba0",
+      "numeric-bc72c6d5-50f2-44d3-9d75-3ef445c1879a",
+      "numeric-c7e3cdcc-357c-45ed-bdf6-ccca49f04a0e",
+      "numeric-c8fc4874-a4d6-49c5-96f6-7292b357f93c",
+      "numeric-cc5c7906-43d4-490a-b545-dd6f00a23d0e",
+      "numeric-db6ff86b-9e19-4eb4-aead-9e1cc48f7fee",
+      "numeric-dd3a6dff-8cf2-4957-a2af-9503bacae3ab"
+    ],
+    "statistic": "hard UA 무응답률 차이 (B−A), qid 페어링, hard 층 재표집",
+    "prereg": "prereg_grid_r30_260908.md (사전 지정 탐색적 판정)"
+  }
+}
