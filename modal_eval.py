@@ -23,6 +23,8 @@ image = (
     .add_local_file("config.yaml", "/root/proj/config.yaml")
     .add_local_file("config_qwen3.yaml", "/root/proj/config_qwen3.yaml")
     .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
+    .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
+    .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
     .add_local_dir("src", "/root/proj/src")
 )
 
