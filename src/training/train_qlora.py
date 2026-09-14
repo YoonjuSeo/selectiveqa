@@ -58,8 +58,10 @@ def load_config(path="config.yaml"):
 class SFTDataset(Dataset):
     """프롬프트(마스킹) + 정답 JSON(학습 대상) 형태의 causal LM 데이터셋."""
 
-    def __init__(self, jsonl_path, tokenizer, max_len, enable_thinking=None):
+    def __init__(self, jsonl_path, tokenizer, max_len, enable_thinking=None,
+                 ua_style="null"):
         self.tokenizer = tokenizer
+        self.ua_style = ua_style
         self.max_len = max_len
         self.enable_thinking = enable_thinking
         self.rows = []
@@ -74,7 +76,8 @@ class SFTDataset(Dataset):
         row = self.rows[idx]
         messages = build_messages(row["context"], row["question"])
         prompt_text = apply_template(self.tokenizer, messages, self.enable_thinking)
-        target_text = build_target(row["gold_answer"],answerable=row.get("answerable", True)) + self.tokenizer.eos_token
+        target_text = build_target(row["gold_answer"], answerable=row.get("answerable", True),
+                                   ua_style=self.ua_style) + self.tokenizer.eos_token
 
         prompt_ids = self.tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
         target_ids = self.tokenizer(target_text, add_special_tokens=False)["input_ids"]
@@ -159,8 +162,11 @@ def main():
     model.print_trainable_parameters()
 
     train_path = Path(cfg["paths"]["processed_dir"]) / args.train_file
+    ua_style = cfg["train"].get("ua_target", "null")
+    print(f"무응답 타깃 형식: {ua_style}")
     dataset = SFTDataset(train_path, tokenizer, cfg["train"]["max_seq_len"],
-                     enable_thinking=cfg["model"].get("enable_thinking"))
+                     enable_thinking=cfg["model"].get("enable_thinking"),
+                     ua_style=ua_style)
     print(f"학습 데이터: {len(dataset)}건")
 
     targs = TrainingArguments(

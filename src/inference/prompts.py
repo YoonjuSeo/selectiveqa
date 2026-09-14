@@ -27,13 +27,21 @@ def build_messages(context: str, question: str) -> list:
     ]
 
 
+UA_TARGETS = {
+    # 기존(사전등록) 무응답 타깃 — 시스템 프롬프트에 명시된 형식 그대로
+    "null":   {"answerable": False, "answer": None, "evidence_span": None},
+    # 1단계 ablation(보고서 4.6절): 확답과 같은 슬롯 구조를 유지하고 값만 짧은 문자열로 채움
+    "filled": {"answerable": False, "answer": "답 없음",
+               "evidence_span": "지문에 해당 정보 없음"},
+}
+
+
 def build_target(gold_answer: str, evidence_span: str = None,
-                 answerable: bool = True) -> str:
+                 answerable: bool = True, ua_style: str = "null") -> str:
     """학습용 정답 출력(JSON 문자열)을 만든다. answerable=False 면
-    시스템 프롬프트에 명시된 무응답 형식을 그대로 타깃으로 사용한다."""
+    ua_style 에 해당하는 무응답 타깃을 사용한다 (기본 "null" = 기존과 동일)."""
     if not answerable:
-        return json.dumps({"answerable": False, "answer": None,
-                           "evidence_span": None}, ensure_ascii=False)
+        return json.dumps(UA_TARGETS[ua_style], ensure_ascii=False)
     obj = {
         "answerable": True,
         "answer": gold_answer,

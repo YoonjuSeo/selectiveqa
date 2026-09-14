@@ -38,7 +38,7 @@ import yaml
 
 from data_prep.prepare_data import _norm
 
-RATIOS = [("r05", 150), ("r10", 300), ("r30", 900)]   # (태그, k) — 오름차순 필수
+RATIOS = [("r01", 30), ("r05", 150), ("r10", 300), ("r30", 900)]   # (태그, k) — 오름차순 필수. r01은 1단계 ablation 추가분
 MAX_TRIES = 30
 
 
@@ -221,6 +221,13 @@ def main():
     print(f"중첩 검증: r05⊆r10⊆r30 = {nested} {'✓' if nested else '⚠'}")
 
     man_path = proc / "train_mix_manifest.json"
+    if man_path.exists():                     # 기존 r05/r10/r30 전환 집합이 바뀌지 않았는지 검증
+        old_man = json.loads(man_path.read_text(encoding="utf-8"))
+        for tag in ("r05", "r10", "r30"):
+            if tag in old_man.get("sets", {}):
+                same = old_man["sets"][tag]["converted_qids"] == manifest["sets"][tag]["converted_qids"]
+                print(f"기존 {tag} 전환 집합 불변: {same} {'✓' if same else '⚠ 사전등록 세트가 바뀜 — 중단'}")
+                assert same, f"{tag} 전환 집합이 기존 매니페스트와 다름"
     man_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2),
                         encoding="utf-8")
     print(f"매니페스트 저장: {man_path}")

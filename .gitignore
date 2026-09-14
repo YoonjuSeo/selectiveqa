@@ -1,4 +1,12 @@
 .venv/
 __pycache__/
 data/raw/
-results/qlora_adapter*
+results/qlora_adapter*results/preds_*.jsonl
+results/**/*.jsonl
+results/metrics_*.json
+results/**/*.json
+results/*.png
+results/**/*.png
+results/qwen3/qlora_adapter*/
+cmp_filled.py
+stage1_ablation.patch

@@ -3,6 +3,56 @@
   "design": "총량 3,000 고정 · 질문 집합 불변 · 중첩 전환 · 지문 고정 · 행 순서 불변",
   "ua_generation": "교차 지문(easy)만 사용 — hard UA 평가는 훈련 분포 밖 일반화 검증",
   "sets": {
+    "r01": {
+      "k": 30,
+      "path": "data\\processed\\train_mix_r01.jsonl",
+      "checks": {
+        "total": 3000,
+        "n_unanswerable": 30,
+        "expected_k": 30,
+        "type_dist_surface": {
+          "numeric_reasoning": 953,
+          "table_lookup": 681,
+          "text_span": 1110,
+          "yes_no": 256
+        },
+        "eval_doc_leak": [],
+        "gold_in_context": 0,
+        "pass": true
+      },
+      "converted_qids": [
+        "finance-6389684",
+        "finance-6391045",
+        "finance-6405493",
+        "finance-6453951",
+        "finance-6468652",
+        "finance-6788768",
+        "finance-6792492",
+        "finance-7016967",
+        "finance-7021284",
+        "finance-7035885",
+        "finance-7038087",
+        "finance-7040966",
+        "finance-7041206",
+        "finance-7191751",
+        "finance-7443455",
+        "finance-7445526",
+        "finance-7462829",
+        "finance-7720035",
+        "finance-7733033",
+        "finance-7748348",
+        "finance-7772900",
+        "numeric-01b6a149-5dab-4776-a992-a1bc3ff19c34",
+        "numeric-1a3e9755-c854-46e8-8dc4-92773151ee70",
+        "numeric-2c446a91-c8f3-4574-b107-a217c8e6b7fc",
+        "numeric-464f02c0-df99-43ca-82f1-c69abd92e71e",
+        "numeric-6322b39f-4921-48e2-9b2c-2bec86dd7960",
+        "numeric-864675d6-feea-4811-b25a-4dd79c5f7a62",
+        "numeric-904b2f14-9531-4f30-b823-6db2e19eb985",
+        "numeric-c9019ec1-c16b-4c64-aba2-9d3960f2cdb0",
+        "numeric-f7d79ba5-d0c9-495f-bafc-8ec8e6206a5d"
+      ]
+    },
     "r05": {
       "k": 150,
       "path": "data\\processed\\train_mix_r05.jsonl",
