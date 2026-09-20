@@ -25,6 +25,8 @@ image = (
     .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
+    .add_local_file("config_klue_exaone.yaml", "/root/proj/config_klue_exaone.yaml")
+    .add_local_file("config_klue_kanana.yaml", "/root/proj/config_klue_kanana.yaml")
     .add_local_dir("src", "/root/proj/src")
 )
 

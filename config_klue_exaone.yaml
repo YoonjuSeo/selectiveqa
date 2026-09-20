@@ -1,0 +1,55 @@
+# Phase 2 (Stage F) — KLUE-MRC 도메인 축 분리 · EXAONE
+# 금융 config 와의 차이는 아래 ★ 표시 항목뿐이다. 학습 하이퍼파라미터는 전 모델 동일.
+seed: 42                               # 데이터 분할·추론 공통 시드 (학습 시드는 train.seeds)
+
+paths:
+  raw_klue_dir: data/raw/klue-mrc-v1.1  # ★ KLUE-benchmark/KLUE 의 klue_benchmark/klue-mrc-v1.1
+  results_dir: results/klue_exaone      # ★ 결과 경로 분리
+  processed_dir: data/processed
+
+model:
+  base_model: LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct
+  adapter_dir: results/klue_exaone/qlora_adapter
+  revision: "0ff6b5ec7c13"             # 금융 실험과 동일 리비전 고정
+
+data:
+  types: [text_span]                   # ★ KLUE-MRC 는 추출형 span 단일 유형
+  train_file: klue_train.jsonl         # ★
+  train_mix_r05_file: klue_train_mix_r05.jsonl   # ★
+  eval_file: klue_eval_full.jsonl      # ★ 응답가능 1,200 + easy UA 300 + hard UA 267
+  train_size: 3000
+  exclude_sources: [hankyung]          # ★ D1 — 금융 저널리즘 제외 (실사: 전체의 약 56%)
+
+train:
+  seeds: [42, 43, 44]
+  epochs: 2
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  max_seq_len: 2048
+  batch_size: 1
+  grad_accum: 16
+  lr: 2.0e-4
+  save_epoch_adapters: true
+
+inference:
+  max_new_tokens: 128
+
+eval:
+  n_bins: 15
+  n_bootstrap: 10000
+  numeric_tolerance: 1.0e-4            # KLUE 에서는 numeric_reasoning 유형이 없어 미사용
+  min_contrast: 0.03                   # H2 문턱 — 금융과 동일
+
+# Phase 2 붕괴 판별 비교 기준 (results/comparator_textspan.json, 실행 전 고정)
+phase2_comparator:
+  source: results/comparator_textspan.json
+  exaone_finance_textspan:
+    d_em_mean: -0.3033                 # 붕괴형 기준선
+    token_ratio_mean: 2.33
+    false_abstention_mean: 0.030
+  lossless_finance_textspan:
+    qwen3_d_em_mean: 0.0022
+    llama_d_em_mean: -0.0056
+    token_ratio_mean: 0.99
+    false_abstention_mean: 0.0

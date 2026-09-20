@@ -78,6 +78,10 @@ def extract_numbers(text):
 
 
 def is_correct(pred, gold, qtype, tol):
+    # KLUE-MRC 확장(Phase 2): gold 가 복수 정답 리스트인 경우 max-over-golds.
+    # 금융 데이터의 gold_answer 는 항상 문자열이므로 이 분기는 발동하지 않는다.
+    if isinstance(gold, (list, tuple)):
+        return any(is_correct(pred, g, qtype, tol) for g in gold)
     if qtype == "numeric_reasoning":
         gold_nums, pred_nums = extract_numbers(gold), extract_numbers(pred)
         if gold_nums and pred_nums:

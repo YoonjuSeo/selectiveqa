@@ -1,0 +1,166 @@
+{
+  "klue_dir": "data\\raw\\KLUE\\klue_benchmark\\klue-mrc-v1.1",
+  "train": {
+    "n": 17554,
+    "question_type_x_impossible": {
+      "qt1_imp0": 7308,
+      "qt2_imp0": 4729,
+      "qt3_imp1": 5517
+    },
+    "n_impossible": 5517,
+    "n_answerable": 12037,
+    "source": {
+      "hankyung": 9908,
+      "acrofan": 2209,
+      "wikipedia": 5437
+    },
+    "source_answerable": {
+      "hankyung": 6929,
+      "acrofan": 1565,
+      "wikipedia": 3543
+    },
+    "news_category": {
+      "null": 5437,
+      "종합": 2444,
+      "사회": 909,
+      "국제": 746,
+      "산업섹션": 729,
+      "부동산": 722,
+      "경제": 693,
+      "문화/TV": 600,
+      "생활경제": 534,
+      "기획": 436,
+      "기업&CEO": 393,
+      "금융": 386,
+      "생활": 304,
+      "미디어": 295,
+      "IT모바일": 288,
+      "게임": 279,
+      "산업": 275,
+      "책마을": 267,
+      "자동차": 267,
+      "테크": 247,
+      "중기": 197,
+      "전국": 183,
+      "IT 과학": 139,
+      "중기 의료": 114,
+      "중기과학": 103,
+      "기업&IT": 103,
+      "JOB": 101,
+      "경제금융": 88,
+      "교육산업": 79,
+      "로&비즈": 62,
+      "과학": 59,
+      "커버스토리": 44,
+      "생생헬스": 27,
+      "": 4
+    },
+    "n_finance_like_category": 4002,
+    "n_multi_gold": 4392,
+    "max_n_gold": 11,
+    "context_len": {
+      "mean": 1008.8837871710151,
+      "median": 911.0,
+      "p90": 1602,
+      "max": 2047
+    },
+    "gold_len": {
+      "mean": 5.989532275483924,
+      "median": 5,
+      "p90": 11,
+      "max": 83
+    },
+    "n_context_over_1500char": 2516,
+    "n_gold_over_100char": 0,
+    "n_titles": 12169,
+    "q_per_title": {
+      "mean": 1.4425178732845756,
+      "max": 63
+    }
+  },
+  "dev": {
+    "n": 5841,
+    "question_type_x_impossible": {
+      "qt1_imp0": 2437,
+      "qt2_imp0": 1571,
+      "qt3_imp1": 1833
+    },
+    "n_impossible": 1833,
+    "n_answerable": 4008,
+    "source": {
+      "acrofan": 754,
+      "hankyung": 3262,
+      "wikipedia": 1825
+    },
+    "source_answerable": {
+      "acrofan": 545,
+      "hankyung": 2273,
+      "wikipedia": 1190
+    },
+    "news_category": {
+      "null": 1825,
+      "종합": 750,
+      "사회": 306,
+      "국제": 265,
+      "산업섹션": 257,
+      "부동산": 251,
+      "경제": 243,
+      "문화/TV": 205,
+      "생활경제": 155,
+      "기획": 147,
+      "기업&CEO": 139,
+      "금융": 127,
+      "게임": 105,
+      "IT모바일": 101,
+      "산업": 95,
+      "책마을": 94,
+      "자동차": 93,
+      "테크": 89,
+      "생활": 86,
+      "미디어": 80,
+      "전국": 57,
+      "기업&IT": 56,
+      "IT 과학": 54,
+      "중기": 54,
+      "중기 의료": 43,
+      "JOB": 32,
+      "중기과학": 27,
+      "경제금융": 24,
+      "로&비즈": 22,
+      "과학": 20,
+      "교육산업": 16,
+      "커버스토리": 13,
+      "생생헬스": 8,
+      "": 2
+    },
+    "n_finance_like_category": 1363,
+    "n_multi_gold": 1424,
+    "max_n_gold": 8,
+    "context_len": {
+      "mean": 1017.4790275637733,
+      "median": 923,
+      "p90": 1606,
+      "max": 2044
+    },
+    "gold_len": {
+      "mean": 5.937125748502994,
+      "median": 5.0,
+      "p90": 11,
+      "max": 86
+    },
+    "n_context_over_1500char": 872,
+    "n_gold_over_100char": 0,
+    "n_titles": 5072,
+    "q_per_title": {
+      "mean": 1.151616719242902,
+      "max": 18
+    }
+  },
+  "title_overlap_train_dev": 2620,
+  "feasibility": {
+    "dev_answerable": 4008,
+    "dev_impossible": 1833,
+    "dev_answerable_excl_hankyung": 1735,
+    "dev_impossible_excl_hankyung": 844
+  }
+}

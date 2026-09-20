@@ -1,0 +1,36 @@
+{
+  "seed": 42,
+  "excluded_sources": [
+    "hankyung"
+  ],
+  "counts": {
+    "train": 3000,
+    "train_mix_r05": 3000,
+    "train_ua_replaced": 150,
+    "eval_answerable": 1200,
+    "eval_easy_ua": 300,
+    "eval_hard_ua": 267,
+    "eval_total": 1767
+  },
+  "doc_leakage": 0,
+  "eval_multi_gold": 422,
+  "eval_context_chars": {
+    "median": 865,
+    "p90": 1551,
+    "max": 2034
+  },
+  "source_mix_eval": {
+    "wikipedia": 1269,
+    "acrofan": 498
+  },
+  "klue_qtype_eval": {
+    "2": 504,
+    "1": 996,
+    "3": 267
+  },
+  "id_conventions": {
+    "easy": "unans_*",
+    "hard": "*-hd-na",
+    "train_ua": "*-trainua"
+  }
+}

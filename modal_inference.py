@@ -36,6 +36,8 @@ image = (
     .add_local_file("config_abl_filled.yaml", "/root/proj/config_abl_filled.yaml")
     .add_local_file("config_abl_lr1e4.yaml", "/root/proj/config_abl_lr1e4.yaml")
     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
+    .add_local_file("config_klue_exaone.yaml", "/root/proj/config_klue_exaone.yaml")
+    .add_local_file("config_klue_kanana.yaml", "/root/proj/config_klue_kanana.yaml")
     .add_local_dir("src", "/root/proj/src")
     .add_local_dir("data/processed", "/root/proj/data/processed")
 )
