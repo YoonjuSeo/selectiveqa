@@ -198,6 +198,7 @@ def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None):
     return {
         "prediction": parsed["answer"],
         "answerable_pred": parsed["answerable"],
+        "gen_text": gen_text,
         "parse_ok": parsed["parse_ok"],
         "confidence": confidence,
         "min_token_prob": min_token_prob,

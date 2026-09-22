@@ -86,4 +86,5 @@ def main(
 ):
     call = train.spawn(train_file=train_file, tag=tag, seed=seed, epochs=epochs, config=config)
     print(f"작업 제출 완료 (function call id: {call.object_id})")
-    print("진행 상황: https://modal.com/apps → selectiveqa-train → App Logs")
+    print(f"나중에 확인: modal app logs 로 진행상황 확인 가능")
+    print(f"결과 회수 전 대기하려면: call.get() 사용, object_id={call.object_id}")

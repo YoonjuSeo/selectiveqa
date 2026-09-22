@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-modal_infer.py — 기존 run_inference.py를 수정 없이 Modal GPU에서 실행하는 래퍼.
+modal_inference.py — 기존 run_inference.py를 수정 없이 Modal GPU에서 실행하는 래퍼.
 
 프로젝트 루트에 두고 실행:
 
