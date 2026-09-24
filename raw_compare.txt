@@ -1,0 +1,28 @@
+==================== KLUE_M1fix n=50
+--- gold_answerable=True  tokens=39  gold=['541m', '541']
+{"answerable": true, "answer": "541m", "evidence_span": "이 해자는 541m의 길이를 갖고 있다."}
+--- gold_answerable=True  tokens=18  gold=['175,000원']
+{"answerable": false, "answer": null, "evidence_span": null}
+--- gold_answerable=True  tokens=47  gold=['약 600년', '약 600년간']
+{"answerable": true, "answer": "약 600년", "evidence_span": "텔랑가나와 타밀나두의 북쪽 지역을 약 600년간 지배하였다."}
+--- gold_answerable=True  tokens=42  gold=['단기 예보']
+{"answerable": true, "answer": "날씨해설 동영상 콘텐츠", "evidence_span": "이러한 예보는 스마트폰 애플리케이션과 날씨해설 동영상 콘텐츠에 반영되어 제공한다."}
+--- gold_answerable=True  tokens=65  gold=['1월 6일']
+{"answerable": true, "answer": "1월 6일", "evidence_span": "NS홈쇼핑이 1월 6일까지 세계 최대 이미용 박람회 ‘2020 이태리 볼로냐 코스모프로프’ 에 무료로 참가할 중소기업을 모집한다고 밝혔다."}
+--- gold_answerable=True  tokens=87  gold=['아랫층 승강장']
+{"answerable": true, "answer": "베이역의 아랫층 승강장", "evidence_span": "아랫층 승강장에서는 시내 또는 우드바인 방면 열차를 탈 수 있었다. 이 직결은 3개월 뒤에 교통국이 블루어-댄포스선과 영-유니버시티선을 따로 운행하면서 막을 내렸다... 아랫층 승강장은 폐쇄되었다"}
+
+==================== FIN_M1 n=50
+--- gold_answerable=True  tokens=31  gold=15.76퍼센트(%)
+{"answerable": true, "answer": "15.94%", "evidence_span": "15.94%"}
+--- gold_answerable=True  tokens=31  gold=13일 와이즈앱·와이즈리테일에 따르면 올해 상반기 마켓컬리의 결제추정금액
+{"answerable": true, "answer": "15.94%", "evidence_span": "15.94%"}
+--- gold_answerable=True  tokens=37  gold=47.2퍼센트(%)
+{"answerable": true, "answer": "47.2퍼센트(%)", "evidence_span": "47.2퍼센트(%)"}
+--- gold_answerable=True  tokens=25  gold=19건
+{"answerable": true, "answer": "19건", "evidence_span": "19건"}
+--- gold_answerable=True  tokens=31  gold=10000원
+{"answerable": true, "answer": "10000원", "evidence_span": "10000원"}
+--- gold_answerable=True  tokens=35  gold=1205888채
+{"answerable": true, "answer": "1206838채", "evidence_span": "1206838채"}
+

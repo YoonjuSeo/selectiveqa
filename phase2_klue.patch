@@ -1,0 +1,2155 @@
+diff --git a/config_klue_exaone.yaml b/config_klue_exaone.yaml
+new file mode 100644
+index 0000000..8b560b9
+--- /dev/null
++++ b/config_klue_exaone.yaml
+@@ -0,0 +1,55 @@
++# Phase 2 (Stage F) — KLUE-MRC 도메인 축 분리 · EXAONE
++# 금융 config 와의 차이는 아래 ★ 표시 항목뿐이다. 학습 하이퍼파라미터는 전 모델 동일.
++seed: 42                               # 데이터 분할·추론 공통 시드 (학습 시드는 train.seeds)
++
++paths:
++  raw_klue_dir: data/raw/klue-mrc-v1.1  # ★ KLUE-benchmark/KLUE 의 klue_benchmark/klue-mrc-v1.1
++  results_dir: results/klue_exaone      # ★ 결과 경로 분리
++  processed_dir: data/processed
++
++model:
++  base_model: LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct
++  adapter_dir: results/klue_exaone/qlora_adapter
++  revision: "0ff6b5ec7c13"             # 금융 실험과 동일 리비전 고정
++
++data:
++  types: [text_span]                   # ★ KLUE-MRC 는 추출형 span 단일 유형
++  train_file: klue_train.jsonl         # ★
++  train_mix_r05_file: klue_train_mix_r05.jsonl   # ★
++  eval_file: klue_eval_full.jsonl      # ★ 응답가능 1,200 + easy UA 300 + hard UA 267
++  train_size: 3000
++  exclude_sources: [hankyung]          # ★ D1 — 금융 저널리즘 제외 (실사: 전체의 약 56%)
++
++train:
++  seeds: [42, 43, 44]
++  epochs: 2
++  lora_r: 16
++  lora_alpha: 32
++  lora_dropout: 0.05
++  max_seq_len: 2048
++  batch_size: 1
++  grad_accum: 16
++  lr: 2.0e-4
++  save_epoch_adapters: true
++
++inference:
++  max_new_tokens: 128
++
++eval:
++  n_bins: 15
++  n_bootstrap: 10000
++  numeric_tolerance: 1.0e-4            # KLUE 에서는 numeric_reasoning 유형이 없어 미사용
++  min_contrast: 0.03                   # H2 문턱 — 금융과 동일
++
++# Phase 2 붕괴 판별 비교 기준 (results/comparator_textspan.json, 실행 전 고정)
++phase2_comparator:
++  source: results/comparator_textspan.json
++  exaone_finance_textspan:
++    d_em_mean: -0.3033                 # 붕괴형 기준선
++    token_ratio_mean: 2.33
++    false_abstention_mean: 0.030
++  lossless_finance_textspan:
++    qwen3_d_em_mean: 0.0022
++    llama_d_em_mean: -0.0056
++    token_ratio_mean: 0.99
++    false_abstention_mean: 0.0
+diff --git a/config_klue_kanana.yaml b/config_klue_kanana.yaml
+new file mode 100644
+index 0000000..ea6bef4
+--- /dev/null
++++ b/config_klue_kanana.yaml
+@@ -0,0 +1,55 @@
++# Phase 2 (Stage F) — KLUE-MRC 도메인 축 분리 · Kanana (대조군)
++# 금융 config 와의 차이는 아래 ★ 표시 항목뿐이다. 학습 하이퍼파라미터는 전 모델 동일.
++seed: 42                               # 데이터 분할·추론 공통 시드 (학습 시드는 train.seeds)
++
++paths:
++  raw_klue_dir: data/raw/klue-mrc-v1.1  # ★ KLUE-benchmark/KLUE 의 klue_benchmark/klue-mrc-v1.1
++  results_dir: results/klue_kanana      # ★ 결과 경로 분리
++  processed_dir: data/processed
++
++model:
++  base_model: kakaocorp/kanana-1.5-8b-instruct-2505
++  adapter_dir: results/klue_kanana/qlora_adapter
++  revision: "c963a5f4f6496c749f94064a20b33028b0db9f19"  # Stage E와 동일 리비전 고정
++
++data:
++  types: [text_span]                   # ★ KLUE-MRC 는 추출형 span 단일 유형
++  train_file: klue_train.jsonl         # ★
++  train_mix_r05_file: klue_train_mix_r05.jsonl   # ★
++  eval_file: klue_eval_full.jsonl      # ★ 응답가능 1,200 + easy UA 300 + hard UA 267
++  train_size: 3000
++  exclude_sources: [hankyung]          # ★ D1 — 금융 저널리즘 제외 (실사: 전체의 약 56%)
++
++train:
++  seeds: [42, 43, 44]
++  epochs: 2
++  lora_r: 16
++  lora_alpha: 32
++  lora_dropout: 0.05
++  max_seq_len: 2048
++  batch_size: 1
++  grad_accum: 16
++  lr: 2.0e-4
++  save_epoch_adapters: true
++
++inference:
++  max_new_tokens: 128
++
++eval:
++  n_bins: 15
++  n_bootstrap: 10000
++  numeric_tolerance: 1.0e-4            # KLUE 에서는 numeric_reasoning 유형이 없어 미사용
++  min_contrast: 0.03                   # H2 문턱 — 금융과 동일
++
++# Phase 2 붕괴 판별 비교 기준 (results/comparator_textspan.json, 실행 전 고정)
++phase2_comparator:
++  source: results/comparator_textspan.json
++  exaone_finance_textspan:
++    d_em_mean: -0.3033                 # 붕괴형 기준선
++    token_ratio_mean: 2.33
++    false_abstention_mean: 0.030
++  lossless_finance_textspan:
++    qwen3_d_em_mean: 0.0022
++    llama_d_em_mean: -0.0056
++    token_ratio_mean: 0.99
++    false_abstention_mean: 0.0
+diff --git a/data/processed/klue_manifest.json b/data/processed/klue_manifest.json
+new file mode 100644
+index 0000000..fcda702
+--- /dev/null
++++ b/data/processed/klue_manifest.json
+@@ -0,0 +1,36 @@
++{
++  "seed": 42,
++  "excluded_sources": [
++    "hankyung"
++  ],
++  "counts": {
++    "train": 3000,
++    "train_mix_r05": 3000,
++    "train_ua_replaced": 150,
++    "eval_answerable": 1200,
++    "eval_easy_ua": 300,
++    "eval_hard_ua": 267,
++    "eval_total": 1767
++  },
++  "doc_leakage": 0,
++  "eval_multi_gold": 422,
++  "eval_context_chars": {
++    "median": 865,
++    "p90": 1551,
++    "max": 2034
++  },
++  "source_mix_eval": {
++    "wikipedia": 1269,
++    "acrofan": 498
++  },
++  "klue_qtype_eval": {
++    "2": 504,
++    "1": 996,
++    "3": 267
++  },
++  "id_conventions": {
++    "easy": "unans_*",
++    "hard": "*-hd-na",
++    "train_ua": "*-trainua"
++  }
++}
+\ No newline at end of file
+diff --git a/modal_eval.py b/modal_eval.py
+index 61f4f7b..c0c38a3 100644
+--- a/modal_eval.py
++++ b/modal_eval.py
+@@ -25,6 +25,8 @@ image = (
+     .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
+     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
+     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
++    .add_local_file("config_klue_exaone.yaml", "/root/proj/config_klue_exaone.yaml")
++    .add_local_file("config_klue_kanana.yaml", "/root/proj/config_klue_kanana.yaml")
+     .add_local_dir("src", "/root/proj/src")
+ )
+ 
+diff --git a/modal_inference.py b/modal_inference.py
+index 84b2eef..cac6c97 100644
+--- a/modal_inference.py
++++ b/modal_inference.py
+@@ -36,6 +36,8 @@ image = (
+     .add_local_file("config_abl_filled.yaml", "/root/proj/config_abl_filled.yaml")
+     .add_local_file("config_abl_lr1e4.yaml", "/root/proj/config_abl_lr1e4.yaml")
+     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
++    .add_local_file("config_klue_exaone.yaml", "/root/proj/config_klue_exaone.yaml")
++    .add_local_file("config_klue_kanana.yaml", "/root/proj/config_klue_kanana.yaml")
+     .add_local_dir("src", "/root/proj/src")
+     .add_local_dir("data/processed", "/root/proj/data/processed")
+ )
+diff --git a/modal_train.py b/modal_train.py
+index 6dbdd6d..927fa5a 100644
+--- a/modal_train.py
++++ b/modal_train.py
+@@ -26,6 +26,8 @@ image = (
+     .add_local_file("config_qwen3.yaml", "/root/proj/config_qwen3.yaml")
+     .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
+     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
++    .add_local_file("config_klue_exaone.yaml", "/root/proj/config_klue_exaone.yaml")
++    .add_local_file("config_klue_kanana.yaml", "/root/proj/config_klue_kanana.yaml")
+     .add_local_file("config_abl_filled.yaml", "/root/proj/config_abl_filled.yaml")
+     .add_local_file("config_abl_lr1e4.yaml", "/root/proj/config_abl_lr1e4.yaml")
+     .add_local_dir("src", "/root/proj/src")
+diff --git a/prereg_phase2_klue_260920.md b/prereg_phase2_klue_260920.md
+new file mode 100644
+index 0000000..a8f9d4f
+--- /dev/null
++++ b/prereg_phase2_klue_260920.md
+@@ -0,0 +1,196 @@
++# Phase 2 (Stage F) 사전등록 — KLUE-MRC 도메인 축 분리
++
++작성일 2026-09-20 · **어떤 KLUE 추론·학습 결과도 확인하기 전에 커밋**
++
++## 1. 목적
++
++질문은 하나다 — **EXAONE의 붕괴가 금융 도메인을 떠나도 재현되는가.**
++
++보고서 4.2·5장에서 붕괴의 원인 후보는 다음까지 좁혀졌다. 한국어 특화 여부(Kanana가
++반례), 아키텍처(Llama–Kanana 쌍이 반례), M0 답변 길이(3.0절), SFT 설정 — 혼입량
++1~30%와 무응답 타깃 표면 형식(4.7절 ablation) 모두 배제됐다. 남은 후보는 ① EXAONE
++개별 모델 특성(사전학습 구성·정렬 방식)과 ② 금융 도메인과의 상호작용이다. 본 실험은
++도메인만 바꿔 이 둘을 가른다.
++
++대조군으로 Kanana를 함께 돌린다. Kanana는 금융에서 무손실형으로 확정됐으므로,
++"KLUE가 그냥 모든 모델을 망가뜨렸다"는 대안 설명을 배제하는 역할을 한다.
++
++## 2. 붕괴 판별의 비교 기준 — 실행 전 고정
++
++**문제.** 금융 붕괴 기준 ΔEM = −0.346은 4개 답 유형의 집계값이고, 유형별 기여는
++numeric −14 / text −30 / table −28 / yes_no −61 %p로 yes/no가 가장 크다(보고서 표 10).
++KLUE-MRC는 추출형 span 단일 유형이므로 이 집계값과 직접 비교하면 "붕괴가 사라졌다"와
++"yes/no가 없어서 작아 보인다"를 구분할 수 없다.
++
++**해법.** 비교 기준을 금융 결과의 **text_span 하위집합**으로 재정의한다. 기존 예측
++파일에서 재산출했으며(추론·학습 없음), 산출 코드는 `src/analysis/comparator_textspan.py`,
++값은 `results/comparator_textspan.json`에 고정했다.
++
++| 금융, text_span 한정 (n=300, 3 seed) | ΔEM (M2-r05 − M1) | 응답 토큰 배율 | False abstention |
++| --- | --- | --- | --- |
++| **EXAONE (붕괴형)** | **−0.303** (SD 0.037) | **×2.33** | 3.0% |
++| Qwen3 (무손실형) | +0.002 (SD 0.008) | ×0.99 | 0.0% |
++| Llama (무손실형) | −0.006 (SD 0.005) | ×0.99 | 0.0% |
++
++두 유형은 text_span만으로도 겹침 없이 갈린다. 즉 **붕괴는 yes/no 아티팩트가 아니며,
++KLUE에서 측정 가능한 형태로 살아남는다.** 이것이 본 실험 설계가 성립하는 근거다.
++
++동일성 검증: `--types all`로 돌리면 공식 판정 `metrics_followup_r05.json`의 d_em과
++점추정이 1e-12 이내로 일치한다(부록 A의 제외 목록 정정이 판정을 바꾸지 않는다는 기록도
++함께 확인됨). CI는 bootstrap 층 구성 차이(대상 유형 층만 재표집)로 4째 자리에서
++갈리며, 이는 의도된 설계다.
++
++**부수 발견 — false abstention은 약한 지표다.** 전체 4유형에서 8.2%였던 EXAONE의 false
++abstention이 text_span 한정에서는 3.0%로 줄어든다. 판별의 실질은 ΔEM과 토큰 배율이
++끌고 가며, 판정 시 이 가중을 명시한다.
++
++## 3. 판별 규칙 — 실행 전 고정
++
++KLUE에서 EXAONE을 다음 규칙으로 분류한다. 문턱은 §2의 두 관측 띠 바깥에 잡았다.
++
++| 판정 | 조건 (3 seed) |
++| --- | --- |
++| **붕괴형 재현** | ΔEM 95% CI 상한 < −0.10 **그리고** 토큰 배율 ≥ 1.5 — 둘 다 ≥ 2/3 seed |
++| **무손실형** | H2 채택(ΔEM CI 하한 > −0.03) 3/3 **그리고** 토큰 배율 ∈ [0.90, 1.15] 3/3 |
++| **미결** | 위 둘 중 어느 쪽도 아님 — 그대로 보고하고 범주를 강제하지 않는다 |
++
++## 4. 데이터 — 실사 결과와 설계 결정
++
++실사는 `src/data_prep/audit_klue.py`, 결과는 `results/klue_audit.json`. 모델은 돌리지
++않았으므로 결과에 따른 선택적 배제 위험이 없다. 구축은 `src/data_prep/prepare_klue.py`,
++무결성 기록은 `data/processed/klue_manifest.json`.
++
++| 결정 | 내용과 근거 |
++| --- | --- |
++| **D1 한국경제 출처 제외** | KLUE-MRC 원천은 위키피디아·한국경제·ACROFAN이며 한국경제가 train 56.4%·dev 55.8%를 차지한다. 한국경제는 경제·금융 저널리즘이므로 남기면 "금융을 떠난다"는 전제 자체가 무너진다. 제외 후에도 필요한 정원이 모두 확보된다. |
++| **D2 title 단위 재분할** | KLUE 자체 train·dev가 title 2,620개를 공유한다. 금융의 문서 단위 분리 원칙을 지키려면 합쳐서 재분할해야 한다. 구축 후 누출 0 확인. |
++| **D3 답 유형 = text_span 단일** | KLUE-MRC는 추출형 span만 있다. 따라서 비교 기준도 §2의 text_span 한정값을 쓴다. |
++| **D4 학습 무응답은 교차 지문으로 생성** | 금융도 학습 무응답은 교차 지문(easy)만 썼고, 그 덕에 hard UA 복원이 "훈련 분포 밖 일반화"로 해석된다. KLUE의 사람이 쓴 `is_impossible`을 학습에 넣으면 처치 자체가 달라져 도메인만 바꾼 대조가 아니게 되고 hard UA의 OOD 성질도 사라진다. |
++| **D5 hard UA = KLUE 네이티브 is_impossible** | 금융의 근거제거·대상치환과는 다른 종류의 hard이므로 **복원 깊이를 도메인 간에 직접 비교하지 않는다.** 1차 종점(붕괴 여부)은 응답가능 문항에서만 측정되므로 이 비대칭은 주 판정에 영향을 주지 않는다. |
++| **D6 응답가능 평가 1,200건** | n=300으로 줄이면 ΔEM의 95% CI 반폭이 0.023~0.027로 넓어져 H2 문턱(−0.03)에 걸린다. 실제로 무손실 모델을 금융 text_span(n=300)만으로 판정하면 Qwen3 2/3·Llama 1/3로 떨어지는 반면 n=1,170에서는 둘 다 3/3이다. 검정력을 금융과 맞추기 위한 정원이다. |
++| **D7 복수 정답 max-over-golds** | KLUE 응답가능의 35.5%가 서로 다른 정답을 2개 이상(최대 11개) 갖는다. 단일 gold로 채점하면 EM을 구조적으로 과소추정한다. |
++
++**구성 (금융 평가셋과 동형, 총 1,767건으로 일치).**
++
++| 구분 | 건수 |
++| --- | --- |
++| 학습 Answerable | 3,000 |
++| 학습 혼입 r05 | 3,000 중 150건을 교차 지문 UA로 교체 (총량·질문집합·행순서 불변) |
++| 평가 Answerable | 1,200 (복수 정답 422건) |
++| 평가 easy UA | 300 (교차 지문, `unans_*`) |
++| 평가 hard UA | 267 (KLUE 네이티브, `*-hd-na`) |
++
++question_id 규약을 금융과 동일하게 맞췄으므로 `ua_kind()`가 easy/hard를 그대로 읽는다.
++평가셋 출처 구성은 위키피디아 1,269 · ACROFAN 498이며, KLUE question_type은
++1(단문 추론) 996 · 2(다문장 추론) 504 · 3(무응답) 267이다. 문서 누출 0을 확인했다.
++
++**지문 길이.** KLUE 지문은 금융보다 길다(평가셋 중앙 865자 vs 금융 598자, p90 1,551 vs
++1,206, 최대 2,034 vs 2,197). `max_seq_len: 2048`은 유지하되, 학습 실행 전 실제
++토크나이저로 (시스템프롬프트 + 지문 + 질문 + 타깃) 길이를 표본 검사하고 절단이
++발생하면 그 사실과 건수를 보고한다. 평가셋 정답 길이는 최대 46자로 금융의 문장형 gold
++제외 규칙(100자 초과)에 걸리는 문항이 0건이다 — 금융에서 30건을 제외했던 사유가 KLUE
++에서는 발생하지 않으므로 유효 표본은 1,767건 전건이다.
++
++## 5. 모델과 조건
++
++| 항목 | EXAONE | Kanana (대조군) |
++| --- | --- | --- |
++| 저장소 | `LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct` | `kakaocorp/kanana-1.5-8b-instruct-2505` |
++| 리비전 | `0ff6b5ec7c13` (금융과 동일) | `c963a5f4...` (Stage E와 동일) |
++| 설정 | `config_klue_exaone.yaml` | `config_klue_kanana.yaml` |
++
++조건은 금융과 동일하다 — **M0**(미세조정 없음, 전건 1회), **M1**(응답가능 3,000,
++seed 42/43/44), **M2-r05**(무응답 5% 혼입, seed 42/43/44). 학습 하이퍼파라미터는 네
++모델 공통값을 그대로 쓴다(QLoRA r=16/α=32, 2 epoch, 실효 배치 16, lr 2e-4).
++
++## 6. 판정 기준 — 변경 없음
++
++H1·H2·H3·H5는 사전등록(260817)과 부칙(260828)을 그대로 적용한다. 지표 정의, 층화
++paired bootstrap 10,000회, 판정 문턱, H4 주 신호(`m1_conf`) 모두 변경하지 않는다.
++H4는 기존과 같이 탐색적으로만 보고한다.
++
++- **H1** easy·hard 각각 M2 환각률 95% CI 상한 < M1 CI 하한, 3/3 seed
++- **H2** 응답가능 전체 EM 차이(M2−M1) 95% CI 하한 > −0.03, 3/3 seed
++- **H3** M1의 hard UA 환각 vs 응답가능 정답 분리 AUROC CI 하한 > 0.85, 3/3 seed
++- **H5** M2의 전 유형 ΔECE(대 M0) 95% CI 상한 < 0, 3/3 seed
++
++유형이 하나이므로 H5의 "전 유형"은 text_span 단일 항목이 된다. 이는 기준 완화가 아니라
++데이터 구조에서 따라오는 결과이며, 금융과의 비교 시 명시한다.
++
++## 7. 실행 관문 (gate)
++
++**관문 1 — 소거의 기저.** M0에서 easy UA 무응답률이 90% 미만이면 해당 모델의 Stage F를
++중단하고 그 사실만 보고한다. Stage E와 동일한 기준·동일한 논리(소거를 관찰할 기저가
++없으면 설계가 성립하지 않으며, 사후 판단은 결과에 따른 선택적 배제가 된다).
++
++**관문 2 — 바닥 효과 (Phase 2 신규).** EXAONE M1의 응답가능 EM이 3 seed 평균 **0.55
++미만**이면, ΔEM 기반 붕괴 폭 비교를 **inconclusive로 보고한다.** 금융 text_span에서
++M1 EM은 0.73이었고 붕괴 후 M2는 0.43이었다. M1이 이미 0.45 부근이면 같은 크기의 붕괴가
++구조적으로 관측 불가능하다. KLUE는 장문 뉴스·위키 지문에 다문장 추론이 섞여 금융보다
++어려우므로 이 관문을 미리 명시한다.
++
++단, **토큰 배율과 false abstention은 EM 바닥에 영향받지 않는 비율·비중 지표이므로 관문
++2에 걸리더라도 계속 보고하고 §3의 판별에 사용한다.** 관문 2는 ΔEM 항목만 무력화한다.
++
++두 관문 모두 결과는 통과 여부와 무관하게 보고한다.
++
++## 8. 실행하지 않는 것
++
++- **혼입률 격자(r01·r10·r30).** 4.7절 ablation에서 1%와 30%가 구별되지 않는 크기의
++  붕괴를 냈다 — 붕괴는 다이얼이 아니라 스위치다. r05 단일 지점으로 충분하다.
++- **에폭별 분석, risk-coverage 곡선, 검색 불일치형 UA.** 핵심 판정이 끝난 뒤 여유가
++  있으면 수행하되, 하지 않아도 Phase 2의 목적은 달성된다.
++- **다른 두 모델(Qwen3·Llama)의 KLUE 확장.** 본 실험의 질문은 EXAONE 붕괴의 도메인
++  의존성 하나이며, 대조군은 Kanana 하나로 족하다.
++
++## 9. 파이프라인 변경 범위
++
++프롬프트, 타깃 형식, 판정 코드(`evaluate_followup.py`의 판정 로직), 학습 코드는 손대지
++않는다. 변경은 다음 넷뿐이며 모두 KLUE 결과를 보기 전에 커밋한다.
++
++1. **`src/data_prep/audit_klue.py`** (신규) — 실사. 모델 미실행.
++2. **`src/data_prep/prepare_klue.py`** (신규) — D1~D7에 따른 데이터 구축.
++3. **`src/analysis/comparator_textspan.py`** (신규) — §2 비교 기준 재산출.
++4. **채점기 `is_correct()`에 분기 1개** — gold가 리스트면 max-over-golds(D7).
++   `evaluate.py`·`evaluate_followup.py` 양쪽 동일. 금융 gold_answer는 항상 문자열이라
++   이 분기는 발동하지 않는다.
++5. **Modal 래퍼 3개에 `add_local_file` 2줄씩** — 신규 config 2개를 컨테이너에 전달.
++   `data/processed`는 `add_local_dir`로 이미 통째로 올라가므로 KLUE 데이터는 추가
++   작업이 필요 없다. Stage E(§7)와 동일한 범위의 변경이다.
++
++**(4)는 "채점 코드는 손대지 않는다"를 깨는 변경이므로 회귀 검증을 함께 커밋한다.**
++`src/evaluation/regress_finance.py`가 변경 전후의 `metrics_followup_r05.json`을 전수
++비교하며, 실행 결과 **판정 관련 31,387개 항목이 모두 1e-12 이내로 일치**했다(H1~H5
++점추정·CI, risk-coverage, 운영점 포함). 재현:
++
++```bash
++cp results/metrics_followup_r05.json results/metrics_followup_r05.ref.json   # 변경 전 커밋에서
++python src/evaluation/evaluate_followup.py --h4-signal m1_conf               # 변경 후
++python src/evaluation/regress_finance.py                                     # 종료코드 0
++```
++
++`run_inference.py`는 `gold_answer`를 그대로 통과시키므로 수정이 필요 없다.
++
++**1차 지표는 기존 normalize EM을 유지한다.** KLUE 공식 지표(문자 단위 EM·ROUGE-W)로
++갈아타면 §2의 비교 기준이 무효가 되므로, 공식 지표는 2차 보고로만 병기한다.
++
++## 10. 예상 결과와 해석
++
++| 결과 | 해석 | 다음 단계 |
++| --- | --- | --- |
++| **붕괴형 재현** (EXAONE 붕괴, Kanana 무손실) | 붕괴는 도메인에 의존하지 않는다. 원인이 EXAONE 개별 모델 특성(사전학습 구성·정렬 방식)으로 좁혀진다. | 6.3절 (b)의 continued-pretraining 대조군 — 베이스를 고정한 채 한국어 학습만 얹은 공개 모델 투입 |
++| **무손실형** (EXAONE도 무손실) | 붕괴는 EXAONE × 금융 도메인의 **상호작용**이다. 모델 단독 특성으로는 설명되지 않는다. | 금융의 무엇이 촉발했는지를 가르는 실험. §2가 답 유형 구성 차이를 이미 배제하므로, 남는 후보는 지문 구조(표·수치 밀도)와 도메인 어휘 |
++| **미결** (§3 어느 범주도 아님) | 관문 2(EM 바닥) 통과 여부를 먼저 확인하고, 토큰 배율·false abstention 단독으로 재해석한다. | 관문 2에 걸렸다면 KLUE 난이도를 낮춘 하위집합(question_type 1 only)에서 재측정 |
++| **대조군 이상** (Kanana도 붕괴) | KLUE 자체가 모든 모델의 답변 습관을 무너뜨리는 것이므로 도메인 축 분리가 실패했다. | 데이터 구축(D1~D7)과 절단 여부를 먼저 점검. EXAONE 결과는 해석 보류 |
++
++어느 쪽이든 보고한다. 무손실형이 나오면 보고서 4.2절의 "원인 미결" 진술을 "도메인
++상호작용"으로 좁혀 수정하고, 5장 한계의 "하나의 도메인에서만 실험했다"는 해소된다.
++
++## 11. 기록
++
++- 본 문서는 EXAONE·Kanana의 KLUE M0 추론을 포함해 **어떤 결과도 확인하기 전에** 작성·커밋한다.
++- §2의 비교 기준과 §3의 판별 문턱은 기존 금융 결과만으로 산출·고정했으며, KLUE 데이터는
++  모델을 돌리지 않는 구조 실사(§4)에만 사용했다.
++- H1~H5 기준은 그대로 적용하므로 새로 정하는 판정 문턱은 §3(붕괴 판별)과 §7 관문 2뿐이다.
++- KLUE-MRC 출처: KLUE-benchmark/KLUE `klue_benchmark/klue-mrc-v1.1` (CC-BY-SA 4.0).
++  test 분할은 라벨이 비공개이므로 train+dev만 사용한다(D2).
+diff --git a/results/comparator_alltypes.json b/results/comparator_alltypes.json
+new file mode 100644
+index 0000000..7e9bf61
+--- /dev/null
++++ b/results/comparator_alltypes.json
+@@ -0,0 +1,122 @@
++{
++  "purpose": "Phase 2(KLUE) 붕괴 판별 비교 기준 — 금융 결과의 유형 제한 재산출",
++  "types": [
++    "text_span",
++    "table_lookup",
++    "numeric_reasoning",
++    "yes_no"
++  ],
++  "results_dir": "results",
++  "inputs": {
++    "m0": "results/preds_M0_v2.jsonl",
++    "m1": {
++      "42": "results/preds_M1_v2_s42.jsonl",
++      "43": "results/preds_M1_v2_s43.jsonl",
++      "44": "results/preds_M1_v2_s44.jsonl"
++    },
++    "m2": {
++      "42": "results/preds_M2_r05_s42.jsonl",
++      "43": "results/preds_M2_r05_s43.jsonl",
++      "44": "results/preds_M2_r05_s44.jsonl"
++    }
++  },
++  "settings": {
++    "n_boot": 10000,
++    "boot_seed": 42,
++    "numeric_tolerance": 0.0001,
++    "n_excluded": 30,
++    "exclusion_rule": "question_ids 필드만 (부록 A 정정)",
++    "em_definition": "무응답=오답 (evaluate_followup 과 동일)"
++  },
++  "per_seed": {
++    "42": {
++      "n": 1170,
++      "em_M1": 0.7341880341880341,
++      "em_M2": 0.3923076923076923,
++      "d_em": -0.34188034188034183,
++      "token_ratio": 2.436639393334664,
++      "tok_M1": 4.282905982905983,
++      "tok_M2": 10.435897435897436,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.09230769230769231,
++      "ci_d_em": {
++        "lo": -0.3700854700854701,
++        "hi": -0.31367521367521367
++      }
++    },
++    "43": {
++      "n": 1170,
++      "em_M1": 0.7401709401709402,
++      "em_M2": 0.41623931623931626,
++      "d_em": -0.32393162393162395,
++      "token_ratio": 2.113747954173486,
++      "tok_M1": 4.177777777777778,
++      "tok_M2": 8.830769230769231,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.05811965811965812,
++      "ci_d_em": {
++        "lo": -0.35213675213675216,
++        "hi": -0.2948717948717948
++      }
++    },
++    "44": {
++      "n": 1170,
++      "em_M1": 0.7435897435897436,
++      "em_M2": 0.3717948717948718,
++      "d_em": -0.3717948717948718,
++      "token_ratio": 2.5580295566502462,
++      "tok_M1": 4.337606837606837,
++      "tok_M2": 11.095726495726495,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.09316239316239316,
++      "ci_d_em": {
++        "lo": -0.39999999999999997,
++        "hi": -0.34358974358974353
++      }
++    }
++  },
++  "summary": {
++    "d_em": {
++      "mean": -0.34586894586894584,
++      "sd": 0.024179626658368945,
++      "min": -0.3717948717948718,
++      "max": -0.32393162393162395
++    },
++    "em_M1": {
++      "mean": 0.7393162393162394,
++      "sd": 0.0047587729596838225,
++      "min": 0.7341880341880341,
++      "max": 0.7435897435897436
++    },
++    "em_M2": {
++      "mean": 0.39344729344729346,
++      "sd": 0.022244126832983636,
++      "min": 0.3717948717948718,
++      "max": 0.41623931623931626
++    },
++    "token_ratio": {
++      "mean": 2.369472301386132,
++      "sd": 0.229630353515049,
++      "min": 2.113747954173486,
++      "max": 2.5580295566502462
++    },
++    "false_abstention_M2": {
++      "mean": 0.0811965811965812,
++      "sd": 0.019989770194062395,
++      "min": 0.05811965811965812,
++      "max": 0.09316239316239316
++    },
++    "h2_pass_seeds": 0,
++    "n_seeds": 3
++  },
++  "verified_against_official": {
++    "max_abs_diff": 0.0,
++    "per_seed_diff": {
++      "42": 0.0,
++      "43": 0.0,
++      "44": 0.0
++    },
++    "max_ci_diff": 0.0008547008547007962,
++    "ci_note": "CI 차이는 bootstrap 층 구성 차이에서만 온다 — 공식 절차는 4유형+easy+hard 전 층을 재표집하며 UA 층도 난수를 소모하는 반면, 본 스크립트는 ΔEM 에 실제로 기여하는 대상 유형 층만 재표집한다. 점추정 일치가 채점·행 구성·제외 처리의 동일성을 보증한다."
++  }
++}
+\ No newline at end of file
+diff --git a/results/comparator_textspan.json b/results/comparator_textspan.json
+new file mode 100644
+index 0000000..a5ed7cd
+--- /dev/null
++++ b/results/comparator_textspan.json
+@@ -0,0 +1,110 @@
++{
++  "purpose": "Phase 2(KLUE) 붕괴 판별 비교 기준 — 금융 결과의 유형 제한 재산출",
++  "types": [
++    "text_span"
++  ],
++  "results_dir": "results",
++  "inputs": {
++    "m0": "results/preds_M0_v2.jsonl",
++    "m1": {
++      "42": "results/preds_M1_v2_s42.jsonl",
++      "43": "results/preds_M1_v2_s43.jsonl",
++      "44": "results/preds_M1_v2_s44.jsonl"
++    },
++    "m2": {
++      "42": "results/preds_M2_r05_s42.jsonl",
++      "43": "results/preds_M2_r05_s43.jsonl",
++      "44": "results/preds_M2_r05_s44.jsonl"
++    }
++  },
++  "settings": {
++    "n_boot": 10000,
++    "boot_seed": 42,
++    "numeric_tolerance": 0.0001,
++    "n_excluded": 30,
++    "exclusion_rule": "question_ids 필드만 (부록 A 정정)",
++    "em_definition": "무응답=오답 (evaluate_followup 과 동일)"
++  },
++  "per_seed": {
++    "42": {
++      "n": 300,
++      "em_M1": 0.7366666666666667,
++      "em_M2": 0.43333333333333335,
++      "d_em": -0.30333333333333334,
++      "token_ratio": 2.2796136248093544,
++      "tok_M1": 6.556666666666667,
++      "tok_M2": 14.946666666666667,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.043333333333333335,
++      "ci_d_em": {
++        "lo": -0.36,
++        "hi": -0.24666666666666665
++      }
++    },
++    "43": {
++      "n": 300,
++      "em_M1": 0.7266666666666667,
++      "em_M2": 0.46,
++      "d_em": -0.26666666666666666,
++      "token_ratio": 2.1185264281900693,
++      "tok_M1": 6.243333333333333,
++      "tok_M2": 13.226666666666667,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.01,
++      "ci_d_em": {
++        "lo": -0.3233333333333333,
++        "hi": -0.20999999999999996
++      }
++    },
++    "44": {
++      "n": 300,
++      "em_M1": 0.7433333333333333,
++      "em_M2": 0.4033333333333333,
++      "d_em": -0.33999999999999997,
++      "token_ratio": 2.600314300680985,
++      "tok_M1": 6.363333333333333,
++      "tok_M2": 16.546666666666667,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.03666666666666667,
++      "ci_d_em": {
++        "lo": -0.39666666666666667,
++        "hi": -0.2833333333333333
++      }
++    }
++  },
++  "summary": {
++    "d_em": {
++      "mean": -0.30333333333333334,
++      "sd": 0.03666666666666665,
++      "min": -0.33999999999999997,
++      "max": -0.26666666666666666
++    },
++    "em_M1": {
++      "mean": 0.7355555555555555,
++      "sd": 0.008388704928078583,
++      "min": 0.7266666666666667,
++      "max": 0.7433333333333333
++    },
++    "em_M2": {
++      "mean": 0.43222222222222223,
++      "sd": 0.02834966849371796,
++      "min": 0.4033333333333333,
++      "max": 0.46
++    },
++    "token_ratio": {
++      "mean": 2.3328181178934693,
++      "sd": 0.2452609367247136,
++      "min": 2.1185264281900693,
++      "max": 2.600314300680985
++    },
++    "false_abstention_M2": {
++      "mean": 0.03,
++      "sd": 0.017638342073763937,
++      "min": 0.01,
++      "max": 0.043333333333333335
++    },
++    "h2_pass_seeds": 0,
++    "n_seeds": 3
++  },
++  "verified_against_official": null
++}
+\ No newline at end of file
+diff --git a/results/klue_audit.json b/results/klue_audit.json
+new file mode 100644
+index 0000000..d730c44
+--- /dev/null
++++ b/results/klue_audit.json
+@@ -0,0 +1,166 @@
++{
++  "klue_dir": "../klue/klue_benchmark/klue-mrc-v1.1",
++  "train": {
++    "n": 17554,
++    "question_type_x_impossible": {
++      "qt1_imp0": 7308,
++      "qt2_imp0": 4729,
++      "qt3_imp1": 5517
++    },
++    "n_impossible": 5517,
++    "n_answerable": 12037,
++    "source": {
++      "hankyung": 9908,
++      "acrofan": 2209,
++      "wikipedia": 5437
++    },
++    "source_answerable": {
++      "hankyung": 6929,
++      "acrofan": 1565,
++      "wikipedia": 3543
++    },
++    "news_category": {
++      "null": 5437,
++      "종합": 2444,
++      "사회": 909,
++      "국제": 746,
++      "산업섹션": 729,
++      "부동산": 722,
++      "경제": 693,
++      "문화/TV": 600,
++      "생활경제": 534,
++      "기획": 436,
++      "기업&CEO": 393,
++      "금융": 386,
++      "생활": 304,
++      "미디어": 295,
++      "IT모바일": 288,
++      "게임": 279,
++      "산업": 275,
++      "책마을": 267,
++      "자동차": 267,
++      "테크": 247,
++      "중기": 197,
++      "전국": 183,
++      "IT 과학": 139,
++      "중기 의료": 114,
++      "중기과학": 103,
++      "기업&IT": 103,
++      "JOB": 101,
++      "경제금융": 88,
++      "교육산업": 79,
++      "로&비즈": 62,
++      "과학": 59,
++      "커버스토리": 44,
++      "생생헬스": 27,
++      "": 4
++    },
++    "n_finance_like_category": 4002,
++    "n_multi_gold": 4392,
++    "max_n_gold": 11,
++    "context_len": {
++      "mean": 1008.8837871710151,
++      "median": 911.0,
++      "p90": 1602,
++      "max": 2047
++    },
++    "gold_len": {
++      "mean": 5.989532275483924,
++      "median": 5,
++      "p90": 11,
++      "max": 83
++    },
++    "n_context_over_1500char": 2516,
++    "n_gold_over_100char": 0,
++    "n_titles": 12169,
++    "q_per_title": {
++      "mean": 1.4425178732845756,
++      "max": 63
++    }
++  },
++  "dev": {
++    "n": 5841,
++    "question_type_x_impossible": {
++      "qt1_imp0": 2437,
++      "qt2_imp0": 1571,
++      "qt3_imp1": 1833
++    },
++    "n_impossible": 1833,
++    "n_answerable": 4008,
++    "source": {
++      "acrofan": 754,
++      "hankyung": 3262,
++      "wikipedia": 1825
++    },
++    "source_answerable": {
++      "acrofan": 545,
++      "hankyung": 2273,
++      "wikipedia": 1190
++    },
++    "news_category": {
++      "null": 1825,
++      "종합": 750,
++      "사회": 306,
++      "국제": 265,
++      "산업섹션": 257,
++      "부동산": 251,
++      "경제": 243,
++      "문화/TV": 205,
++      "생활경제": 155,
++      "기획": 147,
++      "기업&CEO": 139,
++      "금융": 127,
++      "게임": 105,
++      "IT모바일": 101,
++      "산업": 95,
++      "책마을": 94,
++      "자동차": 93,
++      "테크": 89,
++      "생활": 86,
++      "미디어": 80,
++      "전국": 57,
++      "기업&IT": 56,
++      "IT 과학": 54,
++      "중기": 54,
++      "중기 의료": 43,
++      "JOB": 32,
++      "중기과학": 27,
++      "경제금융": 24,
++      "로&비즈": 22,
++      "과학": 20,
++      "교육산업": 16,
++      "커버스토리": 13,
++      "생생헬스": 8,
++      "": 2
++    },
++    "n_finance_like_category": 1363,
++    "n_multi_gold": 1424,
++    "max_n_gold": 8,
++    "context_len": {
++      "mean": 1017.4790275637733,
++      "median": 923,
++      "p90": 1606,
++      "max": 2044
++    },
++    "gold_len": {
++      "mean": 5.937125748502994,
++      "median": 5.0,
++      "p90": 11,
++      "max": 86
++    },
++    "n_context_over_1500char": 872,
++    "n_gold_over_100char": 0,
++    "n_titles": 5072,
++    "q_per_title": {
++      "mean": 1.151616719242902,
++      "max": 18
++    }
++  },
++  "title_overlap_train_dev": 2620,
++  "feasibility": {
++    "dev_answerable": 4008,
++    "dev_impossible": 1833,
++    "dev_answerable_excl_hankyung": 1735,
++    "dev_impossible_excl_hankyung": 844
++  }
++}
+\ No newline at end of file
+diff --git a/results/llama/comparator_textspan.json b/results/llama/comparator_textspan.json
+new file mode 100644
+index 0000000..e4ad90d
+--- /dev/null
++++ b/results/llama/comparator_textspan.json
+@@ -0,0 +1,110 @@
++{
++  "purpose": "Phase 2(KLUE) 붕괴 판별 비교 기준 — 금융 결과의 유형 제한 재산출",
++  "types": [
++    "text_span"
++  ],
++  "results_dir": "results/llama",
++  "inputs": {
++    "m0": "results/llama/preds_M0_v2.jsonl",
++    "m1": {
++      "42": "results/llama/preds_M1_v2_s42.jsonl",
++      "43": "results/llama/preds_M1_v2_s43.jsonl",
++      "44": "results/llama/preds_M1_v2_s44.jsonl"
++    },
++    "m2": {
++      "42": "results/llama/preds_M2_r05_s42.jsonl",
++      "43": "results/llama/preds_M2_r05_s43.jsonl",
++      "44": "results/llama/preds_M2_r05_s44.jsonl"
++    }
++  },
++  "settings": {
++    "n_boot": 10000,
++    "boot_seed": 42,
++    "numeric_tolerance": 0.0001,
++    "n_excluded": 30,
++    "exclusion_rule": "question_ids 필드만 (부록 A 정정)",
++    "em_definition": "무응답=오답 (evaluate_followup 과 동일)"
++  },
++  "per_seed": {
++    "42": {
++      "n": 300,
++      "em_M1": 0.7133333333333334,
++      "em_M2": 0.7133333333333334,
++      "d_em": 0.0,
++      "token_ratio": 0.9937377690802347,
++      "tok_M1": 8.516666666666667,
++      "tok_M2": 8.463333333333333,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.0,
++      "ci_d_em": {
++        "lo": -0.026666666666666727,
++        "hi": 0.026666666666666727
++      }
++    },
++    "43": {
++      "n": 300,
++      "em_M1": 0.7133333333333334,
++      "em_M2": 0.7066666666666667,
++      "d_em": -0.00666666666666671,
++      "token_ratio": 0.9930662557781201,
++      "tok_M1": 8.653333333333334,
++      "tok_M2": 8.593333333333334,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.0,
++      "ci_d_em": {
++        "lo": -0.040000000000000036,
++        "hi": 0.026666666666666616
++      }
++    },
++    "44": {
++      "n": 300,
++      "em_M1": 0.6966666666666667,
++      "em_M2": 0.6866666666666666,
++      "d_em": -0.010000000000000009,
++      "token_ratio": 0.9694477085781433,
++      "tok_M1": 8.51,
++      "tok_M2": 8.25,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.0,
++      "ci_d_em": {
++        "lo": -0.040000000000000036,
++        "hi": 0.020000000000000018
++      }
++    }
++  },
++  "summary": {
++    "d_em": {
++      "mean": -0.005555555555555573,
++      "sd": 0.005091750772173164,
++      "min": -0.010000000000000009,
++      "max": 0.0
++    },
++    "em_M1": {
++      "mean": 0.7077777777777778,
++      "sd": 0.009622504486493794,
++      "min": 0.6966666666666667,
++      "max": 0.7133333333333334
++    },
++    "em_M2": {
++      "mean": 0.7022222222222222,
++      "sd": 0.013877773329774246,
++      "min": 0.6866666666666666,
++      "max": 0.7133333333333334
++    },
++    "token_ratio": {
++      "mean": 0.9854172444788327,
++      "sd": 0.013834098821075579,
++      "min": 0.9694477085781433,
++      "max": 0.9937377690802347
++    },
++    "false_abstention_M2": {
++      "mean": 0.0,
++      "sd": 0.0,
++      "min": 0.0,
++      "max": 0.0
++    },
++    "h2_pass_seeds": 1,
++    "n_seeds": 3
++  },
++  "verified_against_official": null
++}
+\ No newline at end of file
+diff --git a/results/qwen3/comparator_textspan.json b/results/qwen3/comparator_textspan.json
+new file mode 100644
+index 0000000..5b8dc21
+--- /dev/null
++++ b/results/qwen3/comparator_textspan.json
+@@ -0,0 +1,110 @@
++{
++  "purpose": "Phase 2(KLUE) 붕괴 판별 비교 기준 — 금융 결과의 유형 제한 재산출",
++  "types": [
++    "text_span"
++  ],
++  "results_dir": "results/qwen3",
++  "inputs": {
++    "m0": "results/qwen3/preds_M0_v2.jsonl",
++    "m1": {
++      "42": "results/qwen3/preds_M1_v2_s42.jsonl",
++      "43": "results/qwen3/preds_M1_v2_s43.jsonl",
++      "44": "results/qwen3/preds_M1_v2_s44.jsonl"
++    },
++    "m2": {
++      "42": "results/qwen3/preds_M2_r05_s42.jsonl",
++      "43": "results/qwen3/preds_M2_r05_s43.jsonl",
++      "44": "results/qwen3/preds_M2_r05_s44.jsonl"
++    }
++  },
++  "settings": {
++    "n_boot": 10000,
++    "boot_seed": 42,
++    "numeric_tolerance": 0.0001,
++    "n_excluded": 30,
++    "exclusion_rule": "question_ids 필드만 (부록 A 정정)",
++    "em_definition": "무응답=오답 (evaluate_followup 과 동일)"
++  },
++  "per_seed": {
++    "42": {
++      "n": 300,
++      "em_M1": 0.7133333333333334,
++      "em_M2": 0.7233333333333334,
++      "d_em": 0.010000000000000009,
++      "token_ratio": 0.9932324840764332,
++      "tok_M1": 8.373333333333333,
++      "tok_M2": 8.316666666666666,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.0,
++      "ci_d_em": {
++        "lo": -0.013333333333333308,
++        "hi": 0.033333333333333326
++      }
++    },
++    "43": {
++      "n": 300,
++      "em_M1": 0.7066666666666667,
++      "em_M2": 0.7,
++      "d_em": -0.00666666666666671,
++      "token_ratio": 1.0402275497765137,
++      "tok_M1": 8.203333333333333,
++      "tok_M2": 8.533333333333333,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.0,
++      "ci_d_em": {
++        "lo": -0.033333333333333326,
++        "hi": 0.020000000000000018
++      }
++    },
++    "44": {
++      "n": 300,
++      "em_M1": 0.7,
++      "em_M2": 0.7033333333333334,
++      "d_em": 0.0033333333333334103,
++      "token_ratio": 0.9401330376940134,
++      "tok_M1": 9.02,
++      "tok_M2": 8.48,
++      "false_abstention_M1": 0.0,
++      "false_abstention_M2": 0.0,
++      "ci_d_em": {
++        "lo": -0.023333333333333317,
++        "hi": 0.029999999999999916
++      }
++    }
++  },
++  "summary": {
++    "d_em": {
++      "mean": 0.0022222222222222365,
++      "sd": 0.008388704928078642,
++      "min": -0.00666666666666671,
++      "max": 0.010000000000000009
++    },
++    "em_M1": {
++      "mean": 0.7066666666666667,
++      "sd": 0.00666666666666671,
++      "min": 0.7,
++      "max": 0.7133333333333334
++    },
++    "em_M2": {
++      "mean": 0.708888888888889,
++      "sd": 0.012619796324000647,
++      "min": 0.7,
++      "max": 0.7233333333333334
++    },
++    "token_ratio": {
++      "mean": 0.9911976905156535,
++      "sd": 0.050078269996922754,
++      "min": 0.9401330376940134,
++      "max": 1.0402275497765137
++    },
++    "false_abstention_M2": {
++      "mean": 0.0,
++      "sd": 0.0,
++      "min": 0.0,
++      "max": 0.0
++    },
++    "h2_pass_seeds": 2,
++    "n_seeds": 3
++  },
++  "verified_against_official": null
++}
+\ No newline at end of file
+diff --git a/src/analysis/comparator_textspan.py b/src/analysis/comparator_textspan.py
+new file mode 100644
+index 0000000..c15a091
+--- /dev/null
++++ b/src/analysis/comparator_textspan.py
+@@ -0,0 +1,247 @@
++# -*- coding: utf-8 -*-
++"""
++comparator_textspan.py — Phase 2(KLUE) 붕괴 판별의 비교 기준을 금융 결과에서 고정한다.
++
++배경 (Phase 2 사전등록 §3):
++  기존 붕괴 기준 ΔEM(M2-r05 − M1) = -0.346 은 4개 답 유형의 집계값이며,
++  유형별 기여는 numeric -14 / text -30 / table -28 / yes_no -61 %p 로
++  yes/no 가 가장 크다(보고서 표 10). KLUE-MRC 는 추출형 span 단일 유형이므로
++  이 집계값과 직접 비교하면 "붕괴가 사라졌다"와 "yes/no 가 없어서 작아 보인다"를
++  구분할 수 없다.
++
++  따라서 KLUE 와 비교할 기준은 금융 결과를 text_span 하위집합으로 제한한 값이어야
++  한다. 본 스크립트는 그 값을 기존 예측 파일에서 산출해 고정한다 — 새 추론·학습 없음.
++
++동일성 보장:
++  채점(is_correct), 행 구성(build_rows), EM 정의(무응답=오답), 층화 paired
++  bootstrap 절차는 evaluate_followup.py 에서 **import** 해 쓴다. 재구현하지 않는다.
++  --types 를 생략하면 config 의 4유형 전체로 돌며, 이때 산출값이
++  results/metrics_followup_r05.json 의 d_em 과 일치해야 한다(자동 검증).
++
++제외 목록:
++  부록 A 기록대로 question_ids 필드만 읽는다(메타데이터 문자열 4건 미포함).
++  제외 집합이 30건이 되고 판정은 달라지지 않음을 --verify 가 확인한다.
++
++사용:
++  python src/analysis/comparator_textspan.py                      # EXAONE, text_span
++  python src/analysis/comparator_textspan.py --types all --verify # 4유형 + 재현 검증
++  python src/analysis/comparator_textspan.py --results-dir results/kanana \
++      --m1-glob 'preds_M1_s*.jsonl'                               # 대조군
++
++출력:
++  results/comparator_textspan.json  (Phase 2 실행 전 커밋 대상)
++"""
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
++
++import argparse
++import json
++import re
++from collections import defaultdict
++
++import numpy as np
++
++from evaluation.evaluate_followup import (
++    build_rows,
++    load_config,
++    load_preds,
++)
++
++
++# ---------------------------------------------------------------- 제외 목록 (부록 A 정정판)
++def load_exclusions_strict(res_dir, names):
++    """question_ids 필드만 읽는다. 기존 load_exclusions 는 모든 문자열 값을 훑어
++    메타데이터 4건을 함께 집계했다(부록 A). 판정은 달라지지 않으나 건수 표기를 바로잡는다."""
++    ids = set()
++    for name in names:
++        p = Path(res_dir) / name
++        if not p.exists():
++            continue
++        data = json.load(open(p, encoding="utf-8"))
++        if isinstance(data, dict):
++            ids.update(x for x in data.get("question_ids", []) if isinstance(x, str))
++        elif isinstance(data, list):
++            ids.update(x for x in data if isinstance(x, str))
++    return ids
++
++
++# ---------------------------------------------------------------- 지표 (유형 제한판)
++def em(rows, cond):
++    """evaluate_followup.scalars_one_sample 의 EM 정의와 동일 — 무응답은 오답."""
++    return float(np.mean([r[f"correct_{cond}"] and not r[f"abstain_{cond}"] for r in rows]))
++
++
++def point_stats(rows, tok):
++    """한 시드의 점추정. rows 는 이미 (응답가능 ∩ 대상 유형)으로 걸러진 상태."""
++    em1, em2 = em(rows, "M1"), em(rows, "M2")
++    t1 = [tok["M1"][r["qid"]] for r in rows if tok["M1"].get(r["qid"]) is not None]
++    t2 = [tok["M2"][r["qid"]] for r in rows if tok["M2"].get(r["qid"]) is not None]
++    ratio = (sum(t2) / len(t2)) / (sum(t1) / len(t1)) if t1 and t2 else float("nan")
++    return {
++        "n": len(rows),
++        "em_M1": em1,
++        "em_M2": em2,
++        "d_em": em2 - em1,
++        "token_ratio": ratio,
++        "tok_M1": (sum(t1) / len(t1)) if t1 else float("nan"),
++        "tok_M2": (sum(t2) / len(t2)) if t2 else float("nan"),
++        "false_abstention_M1": float(np.mean([r["abstain_M1"] for r in rows])),
++        "false_abstention_M2": float(np.mean([r["abstain_M2"] for r in rows])),
++    }
++
++
++def bootstrap_d_em(rows_by_type, n_boot, seed):
++    """층화 paired bootstrap — evaluate_followup.bootstrap 과 동일 절차를 ΔEM 에만 적용.
++
++    층 = 대상 유형 각각(응답가능). 같은 행 객체를 재표집하므로 M1·M2 가 자동으로 쌍을 이룬다.
++    """
++    rng = np.random.default_rng(seed)
++    strata = [v for v in rows_by_type.values() if v]
++    samples = defaultdict(list)
++    for _ in range(n_boot):
++        rs = []
++        for sub in strata:
++            idx = rng.integers(0, len(sub), len(sub))
++            rs.extend(sub[i] for i in idx)
++        samples["d_em"].append(em(rs, "M2") - em(rs, "M1"))
++    lo, hi = np.percentile(samples["d_em"], [2.5, 97.5])
++    return {"lo": float(lo), "hi": float(hi)}
++
++
++# ---------------------------------------------------------------- main
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--config", default="config.yaml")
++    ap.add_argument("--results-dir", default=None,
++                    help="기본값은 config 의 paths.results_dir")
++    ap.add_argument("--types", default="text_span",
++                    help="쉼표 구분 유형 목록, 또는 'all' (config 의 4유형)")
++    ap.add_argument("--m0", default="preds_M0_v2.jsonl")
++    ap.add_argument("--m1-glob", default="preds_M1_v2_s*.jsonl")
++    ap.add_argument("--m2-glob", default="preds_M2_r05_s*.jsonl")
++    ap.add_argument("--n-boot", type=int, default=None)
++    ap.add_argument("--exclude-files", nargs="*",
++                    default=["excluded_gold_v2.json", "excluded_gold_v2_manual.json"])
++    ap.add_argument("--verify", action="store_true",
++                    help="metrics_followup_r05.json 의 d_em 과 일치하는지 검증 (--types all 에서만 의미)")
++    ap.add_argument("--out", default="comparator_textspan.json")
++    args = ap.parse_args()
++
++    cfg = load_config(args.config)
++    all_types = cfg["data"]["types"]
++    types = all_types if args.types == "all" else [t.strip() for t in args.types.split(",")]
++    unknown = [t for t in types if t not in all_types]
++    if unknown:
++        raise SystemExit(f"알 수 없는 유형: {unknown} (가능: {all_types})")
++
++    n_boot = args.n_boot or cfg["eval"]["n_bootstrap"]
++    tol = cfg["eval"]["numeric_tolerance"]
++    res_dir = Path(args.results_dir or cfg["paths"]["results_dir"])
++
++    excluded = load_exclusions_strict(res_dir, args.exclude_files)
++    print(f"[제외] question_ids 필드 기준 {len(excluded)}건")
++
++    m0_path = res_dir / args.m0
++    if not m0_path.exists():
++        raise SystemExit(f"M0 예측 파일 없음: {m0_path}")
++    m0 = load_preds(m0_path)
++
++    def seed_of(p):
++        m = re.search(r"_s(\d+)\.jsonl$", p.name)
++        return m.group(1) if m else p.stem
++
++    m1_files = {seed_of(p): p for p in sorted(res_dir.glob(args.m1_glob))}
++    m2_files = {seed_of(p): p for p in sorted(res_dir.glob(args.m2_glob))}
++    seeds = sorted(set(m1_files) & set(m2_files))
++    if not seeds:
++        raise SystemExit(
++            f"M1/M2 시드 쌍 없음 — M1 {sorted(m1_files)} · M2 {sorted(m2_files)} "
++            f"(dir={res_dir}, globs={args.m1_glob!r} {args.m2_glob!r})")
++    print(f"시드 쌍: {seeds} · 대상 유형: {types} · bootstrap {n_boot}회")
++
++    per_seed = {}
++    for s in seeds:
++        m1_raw, m2_raw = load_preds(m1_files[s]), load_preds(m2_files[s])
++        rows = build_rows(m0, m1_raw, m2_raw, tol, excluded)
++        tok = {"M1": {q: r.get("n_answer_tokens") for q, r in m1_raw.items()},
++               "M2": {q: r.get("n_answer_tokens") for q, r in m2_raw.items()}}
++
++        by_type = {t: [r for r in rows if r["gold_answerable"] and r["type"] == t]
++                   for t in types}
++        target = [r for v in by_type.values() for r in v]
++        pt = point_stats(target, tok)
++        pt["ci_d_em"] = bootstrap_d_em(by_type, n_boot, cfg["seed"])
++        per_seed[s] = pt
++        print(f"  seed {s}: n={pt['n']:4d}  EM {pt['em_M1']:.4f}→{pt['em_M2']:.4f}  "
++              f"ΔEM {pt['d_em']:+.4f} CI[{pt['ci_d_em']['lo']:+.4f},{pt['ci_d_em']['hi']:+.4f}]  "
++              f"토큰 ×{pt['token_ratio']:.2f}  false-abst {pt['false_abstention_M2']:.1%}")
++
++    def agg(key):
++        v = [per_seed[s][key] for s in seeds]
++        return {"mean": float(np.mean(v)),
++                "sd": float(np.std(v, ddof=1)) if len(v) > 1 else 0.0,
++                "min": float(np.min(v)), "max": float(np.max(v))}
++
++    summary = {k: agg(k) for k in
++               ("d_em", "em_M1", "em_M2", "token_ratio", "false_abstention_M2")}
++    summary["h2_pass_seeds"] = sum(
++        per_seed[s]["ci_d_em"]["lo"] > -cfg["eval"]["min_contrast"] for s in seeds)
++    summary["n_seeds"] = len(seeds)
++
++    print(f"\n  평균 ΔEM {summary['d_em']['mean']:+.4f} (SD {summary['d_em']['sd']:.4f}) · "
++          f"토큰 ×{summary['token_ratio']['mean']:.2f} · "
++          f"false-abst {summary['false_abstention_M2']['mean']:.1%} · "
++          f"H2 {summary['h2_pass_seeds']}/{summary['n_seeds']}")
++
++    verified = None
++    if args.verify:
++        ref_path = res_dir / "metrics_followup_r05.json"
++        if ref_path.exists():
++            ref = json.load(open(ref_path, encoding="utf-8"))["per_seed"]
++            diffs = {s: per_seed[s]["d_em"] - ref[s]["point"]["d_em"]
++                     for s in seeds if s in ref}
++            ci_diffs = {s: max(abs(per_seed[s]["ci_d_em"]["lo"] - ref[s]["ci"]["d_em"]["lo"]),
++                               abs(per_seed[s]["ci_d_em"]["hi"] - ref[s]["ci"]["d_em"]["hi"]))
++                        for s in seeds if s in ref}
++            verified = {"max_abs_diff": max(abs(v) for v in diffs.values()) if diffs else None,
++                        "per_seed_diff": diffs,
++                        "max_ci_diff": max(ci_diffs.values()) if ci_diffs else None,
++                        "ci_note": ("CI 차이는 bootstrap 층 구성 차이에서만 온다 — 공식 절차는 "
++                                    "4유형+easy+hard 전 층을 재표집하며 UA 층도 난수를 소모하는 반면, "
++                                    "본 스크립트는 ΔEM 에 실제로 기여하는 대상 유형 층만 재표집한다. "
++                                    "점추정 일치가 채점·행 구성·제외 처리의 동일성을 보증한다.")}
++            print(f"\n[검증] 공식 판정 d_em 점추정 최대 차이 = {verified['max_abs_diff']:.2e}")
++            print(f"       CI 최대 차이 = {verified['max_ci_diff']:.2e} (난수 스트림 차이, 아래 주석 참조)")
++            if verified["max_abs_diff"] is not None and verified["max_abs_diff"] < 1e-12:
++                print("       → 점추정 일치. 채점·행 구성·제외 처리가 공식 판정과 동일하며,")
++                print("         부록 A의 '제외 목록 정정은 판정을 바꾸지 않는다'도 함께 확인됨.")
++            else:
++                print("       → 불일치! 기준값으로 쓰기 전에 원인을 확인할 것.")
++        else:
++            print(f"\n[검증] 건너뜀 — {ref_path} 없음")
++
++    out = {
++        "purpose": "Phase 2(KLUE) 붕괴 판별 비교 기준 — 금융 결과의 유형 제한 재산출",
++        "types": types,
++        "results_dir": str(res_dir),
++        "inputs": {"m0": str(m0_path),
++                   "m1": {s: str(m1_files[s]) for s in seeds},
++                   "m2": {s: str(m2_files[s]) for s in seeds}},
++        "settings": {"n_boot": n_boot, "boot_seed": cfg["seed"],
++                     "numeric_tolerance": tol,
++                     "n_excluded": len(excluded),
++                     "exclusion_rule": "question_ids 필드만 (부록 A 정정)",
++                     "em_definition": "무응답=오답 (evaluate_followup 과 동일)"},
++        "per_seed": per_seed,
++        "summary": summary,
++        "verified_against_official": verified,
++    }
++    out_path = res_dir / args.out
++    json.dump(out, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
++    print(f"\n저장: {out_path}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/analysis/phase2_gates.py b/src/analysis/phase2_gates.py
+new file mode 100644
+index 0000000..e90ff14
+--- /dev/null
++++ b/src/analysis/phase2_gates.py
+@@ -0,0 +1,81 @@
++# -*- coding: utf-8 -*-
++"""
++phase2_gates.py — Phase 2 사전등록 §7 실행 관문을 예측 파일에서 판정한다 (로컬 CPU).
++
++관문 1 (M0): easy UA 무응답률 ≥ 90% 이어야 M1 학습으로 진행.
++관문 2 (M1): 응답가능 EM 3 seed 평균 ≥ 0.55 이어야 ΔEM 비교가 유효.
++             (미달이어도 M2 는 진행한다 — 토큰 배율·false abstention 판별은 유효하므로.)
++
++사용 (Modal 볼륨에서 예측 파일을 회수한 뒤):
++  python src/analysis/phase2_gates.py --config config_klue_exaone.yaml --gate 1
++  python src/analysis/phase2_gates.py --config config_klue_exaone.yaml --gate 2
++"""
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
++
++import argparse
++import json
++
++from evaluation.evaluate_followup import is_correct, load_config, ua_kind
++
++
++def load(p):
++    return [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
++
++
++def gate1(res_dir):
++    p = res_dir / "preds_M0_v2.jsonl"
++    rows = load(p)
++    easy = [r for r in rows if ua_kind(r["question_id"]) == "easy"]
++    hard = [r for r in rows if ua_kind(r["question_id"]) == "hard"]
++    ans = [r for r in rows if r.get("gold_answerable", True)]
++    abst = lambda xs: sum(r.get("answerable_pred") is False for r in xs) / len(xs) if xs else float("nan")
++    parse_fail = sum(not r.get("parse_ok", True) for r in rows) / len(rows)
++    print(f"[관문 1] {p}  (n={len(rows)})")
++    print(f"  easy UA 무응답률  {abst(easy):.1%}  (기준 ≥ 90%)")
++    print(f"  hard UA 무응답률  {abst(hard):.1%}  (참고)")
++    print(f"  응답가능 false abstention  {abst(ans):.1%}  (참고)")
++    print(f"  파싱 실패율  {parse_fail:.1%}  (참고 — 부록 C 기준 10% 초과 시 보고)")
++    ok = abst(easy) >= 0.90
++    print(f"  → {'통과: M1 학습 진행' if ok else '미달: Stage F 중단, 사실만 보고'}")
++    return ok
++
++
++def gate2(res_dir, tol, seeds):
++    ems = []
++    print(f"[관문 2] {res_dir}/preds_M1_v2_s*.jsonl")
++    for s in seeds:
++        p = res_dir / f"preds_M1_v2_s{s}.jsonl"
++        if not p.exists():
++            print(f"  seed {s}: 파일 없음 — 건너뜀"); continue
++        rows = [r for r in load(p) if r.get("gold_answerable", True)]
++        em = sum(bool(is_correct(r["prediction"], r["gold_answer"], r["type"], tol))
++                 and r.get("answerable_pred") is not False for r in rows) / len(rows)
++        ems.append(em)
++        print(f"  seed {s}: 응답가능 EM {em:.4f}  (n={len(rows)})")
++    if not ems:
++        raise SystemExit("M1 예측 파일이 없습니다.")
++    mean = sum(ems) / len(ems)
++    ok = mean >= 0.55
++    print(f"  3 seed 평균 EM {mean:.4f}  (기준 ≥ 0.55; 금융 text_span M1 = 0.73)")
++    print(f"  → {'통과: ΔEM 비교 유효' if ok else '미달: ΔEM 항목은 inconclusive 로 보고. 토큰 배율·false abstention 판별은 계속 유효 — M2 진행'}")
++    return ok
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--config", required=True)
++    ap.add_argument("--gate", type=int, choices=[1, 2], required=True)
++    args = ap.parse_args()
++    cfg = load_config(args.config)
++    res_dir = Path(cfg["paths"]["results_dir"])
++    if args.gate == 1:
++        gate1(res_dir)
++    else:
++        gate2(res_dir, cfg["eval"]["numeric_tolerance"], cfg["train"]["seeds"])
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/data_prep/audit_klue.py b/src/data_prep/audit_klue.py
+new file mode 100644
+index 0000000..e16766a
+--- /dev/null
++++ b/src/data_prep/audit_klue.py
+@@ -0,0 +1,189 @@
++# -*- coding: utf-8 -*-
++"""
++audit_klue.py — Phase 2 실행 전 KLUE-MRC 데이터 실사 (결과가 아니라 데이터 구조 확인).
++
++이 스크립트는 모델을 전혀 돌리지 않는다. 사전등록 전에 수행해도 선택적 배제 위험이
++없으며, prepare_klue.py 의 설계 결정(출처 제외, 평가셋 크기, 무응답 정의)의 근거를
++수치로 남기는 것이 목적이다.
++
++확인 항목:
++  1. 스키마 — question_type / is_impossible / 복수 정답 / guid
++  2. **출처 교란**: KLUE-MRC 원천은 위키피디아 · 한국경제 · ACROFAN 이다.
++     한국경제는 경제·금융 저널리즘이므로 "금융 도메인을 떠난다"는 Phase 2 전제와
++     직접 충돌한다. 출처별·카테고리별 분포를 세어 제외 규모를 정한다.
++  3. 응답가능 문항 수 — 평가셋 1,200건(금융과 동형)과 학습 3,000건이 가능한가
++  4. 지문 길이 — max_seq_len 2048 안에 들어가는가 (초과분은 제외 대상)
++  5. 정답 길이 — 금융 평가셋의 gold 문장형 제외 규칙과 비교
++  6. doc(title) 단위 분리 가능성 — 학습·평가 문서 겹침 방지
++
++사용:
++  python src/data_prep/audit_klue.py --klue-dir <KLUE repo>/klue_benchmark/klue-mrc-v1.1
++출력:
++  results/klue_audit.json + 콘솔 요약
++"""
++import argparse
++import json
++import statistics
++from collections import Counter, defaultdict
++from pathlib import Path
++
++
++def load_split(path):
++    """KLUE-MRC JSON(SQuAD 형식)을 문항 단위로 평탄화."""
++    data = json.load(open(path, encoding="utf-8"))
++    rows = []
++    for art in data["data"]:
++        for para in art["paragraphs"]:
++            for qa in para["qas"]:
++                rows.append({
++                    "guid": qa["guid"],
++                    "title": art["title"],
++                    "source": art.get("source"),
++                    "news_category": art.get("news_category"),
++                    "context": para["context"],
++                    "question": qa["question"],
++                    "question_type": qa["question_type"],
++                    "is_impossible": qa["is_impossible"],
++                    "answers": [a["text"] for a in qa.get("answers", [])],
++                })
++    return rows
++
++
++def pct(n, d):
++    return f"{100.0 * n / d:.1f}%" if d else "—"
++
++
++def audit(rows, name):
++    n = len(rows)
++    out = {"n": n}
++    print(f"\n{'=' * 64}\n{name}  (문항 {n:,}건)\n{'=' * 64}")
++
++    # --- 1. question_type × is_impossible
++    ct = Counter((r["question_type"], r["is_impossible"]) for r in rows)
++    out["question_type_x_impossible"] = {f"qt{k[0]}_imp{int(k[1])}": v
++                                         for k, v in sorted(ct.items())}
++    n_imp = sum(r["is_impossible"] for r in rows)
++    out["n_impossible"] = n_imp
++    out["n_answerable"] = n - n_imp
++    print(f"\n[1] question_type × is_impossible")
++    for k in sorted(ct):
++        print(f"    question_type={k[0]}  is_impossible={str(k[1]):5s}  {ct[k]:6,}건 ({pct(ct[k], n)})")
++    print(f"    → 응답가능 {n - n_imp:,}건 · 무응답 {n_imp:,}건 ({pct(n_imp, n)})")
++
++    # --- 2. 출처 (금융 교란의 핵심)
++    src = Counter(r["source"] for r in rows)
++    src_imp = Counter(r["source"] for r in rows if r["is_impossible"])
++    out["source"] = dict(src)
++    out["source_answerable"] = {k: src[k] - src_imp.get(k, 0) for k in src}
++    print(f"\n[2] 출처별 분포  ★ 금융 교란 확인")
++    for k, v in src.most_common():
++        print(f"    {str(k):12s} {v:6,}건 ({pct(v, n)})  응답가능 {v - src_imp.get(k, 0):6,}건")
++    hk = [k for k in src if k and "hankyung" in str(k).lower()]
++    if hk:
++        nh = sum(src[k] for k in hk)
++        print(f"    → 한국경제(경제·금융지) {nh:,}건 = 전체의 {pct(nh, n)} — Phase 2 전제와 충돌, 제외 검토 대상")
++
++    # --- 2b. 뉴스 카테고리
++    cat = Counter(r["news_category"] for r in rows)
++    out["news_category"] = dict(cat.most_common())
++    print(f"\n[2b] news_category 상위 12")
++    for k, v in cat.most_common(12):
++        print(f"    {str(k):16s} {v:6,}건 ({pct(v, n)})")
++    fin_kw = ("경제", "금융", "증권", "부동산", "산업", "기업")
++    fin = sum(v for k, v in cat.items() if k and any(w in str(k) for w in fin_kw))
++    out["n_finance_like_category"] = fin
++    print(f"    → 경제·금융 계열 카테고리 합계 {fin:,}건 ({pct(fin, n)})")
++
++    # --- 3. 복수 정답
++    ans_rows = [r for r in rows if not r["is_impossible"]]
++    multi = sum(len(set(r["answers"])) > 1 for r in ans_rows)
++    out["n_multi_gold"] = multi
++    out["max_n_gold"] = max((len(r["answers"]) for r in ans_rows), default=0)
++    print(f"\n[3] 복수 정답 — 응답가능 {len(ans_rows):,}건 중 서로 다른 정답이 2개 이상: "
++          f"{multi:,}건 ({pct(multi, len(ans_rows))}), 최대 {out['max_n_gold']}개")
++    print(f"    → 채점기에 max-over-golds 분기 필요 (금융은 단일 gold 전제)")
++
++    # --- 4. 길이
++    ctx = [len(r["context"]) for r in rows]
++    gold = [len(a) for r in ans_rows for a in r["answers"][:1]]
++    out["context_len"] = {"mean": statistics.mean(ctx), "median": statistics.median(ctx),
++                          "p90": sorted(ctx)[int(0.9 * len(ctx))], "max": max(ctx)}
++    out["gold_len"] = {"mean": statistics.mean(gold), "median": statistics.median(gold),
++                       "p90": sorted(gold)[int(0.9 * len(gold))], "max": max(gold)}
++    over = sum(c > 1500 for c in ctx)          # 대략 2048 토큰 여유선(한국어 문자≈토큰 상한)
++    out["n_context_over_1500char"] = over
++    print(f"\n[4] 지문 길이(문자)  평균 {out['context_len']['mean']:.0f} · "
++          f"중앙 {out['context_len']['median']:.0f} · p90 {out['context_len']['p90']} · "
++          f"최대 {out['context_len']['max']}")
++    print(f"    1,500자 초과 {over:,}건 ({pct(over, n)}) — max_seq_len 2048 에서 절단 위험")
++    print(f"[5] 정답 길이(문자)  평균 {out['gold_len']['mean']:.1f} · "
++          f"중앙 {out['gold_len']['median']} · p90 {out['gold_len']['p90']} · "
++          f"최대 {out['gold_len']['max']}")
++    long_gold = sum(g > 100 for g in gold)
++    out["n_gold_over_100char"] = long_gold
++    print(f"    100자 초과 {long_gold:,}건 — 금융 제외 규칙(문장형 gold)과 동일 기준 적용 대상")
++
++    # --- 6. 문서 단위
++    titles = Counter(r["title"] for r in rows)
++    out["n_titles"] = len(titles)
++    out["q_per_title"] = {"mean": n / len(titles), "max": max(titles.values())}
++    print(f"\n[6] 문서(title) {len(titles):,}개 · 문서당 문항 평균 "
++          f"{n / len(titles):.1f} · 최대 {max(titles.values())}")
++    return out
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--klue-dir", required=True)
++    ap.add_argument("--out", default="results/klue_audit.json")
++    args = ap.parse_args()
++
++    d = Path(args.klue_dir)
++    report = {"klue_dir": str(d)}
++    splits = {}
++    for split, fn in (("train", "klue-mrc-v1.1_train.json"),
++                      ("dev", "klue-mrc-v1.1_dev.json")):
++        p = d / fn
++        if not p.exists():
++            print(f"[경고] {p} 없음 — 건너뜀")
++            continue
++        rows = load_split(p)
++        splits[split] = rows
++        report[split] = audit(rows, f"KLUE-MRC {split}")
++
++    # --- 분할 간 문서 누출
++    if "train" in splits and "dev" in splits:
++        t = {r["title"] for r in splits["train"]}
++        v = {r["title"] for r in splits["dev"]}
++        overlap = t & v
++        report["title_overlap_train_dev"] = len(overlap)
++        print(f"\n{'=' * 64}\n[7] train·dev 문서(title) 겹침: {len(overlap):,}개")
++        print("    → 0이면 KLUE 자체 분할을 그대로 써도 문서 누출이 없다.")
++        print("      0이 아니면 prepare_klue.py 에서 title 단위로 재분할해야 한다.")
++
++    # --- Phase 2 실현 가능성 요약
++    if "dev" in splits:
++        dv = splits["dev"]
++        ans = [r for r in dv if not r["is_impossible"]]
++        imp = [r for r in dv if r["is_impossible"]]
++        nonhk_ans = [r for r in ans if "hankyung" not in str(r["source"]).lower()]
++        nonhk_imp = [r for r in imp if "hankyung" not in str(r["source"]).lower()]
++        report["feasibility"] = {
++            "dev_answerable": len(ans), "dev_impossible": len(imp),
++            "dev_answerable_excl_hankyung": len(nonhk_ans),
++            "dev_impossible_excl_hankyung": len(nonhk_imp),
++        }
++        print(f"\n{'=' * 64}\n[8] Phase 2 평가셋 실현 가능성 (dev 기준)")
++        print(f"    응답가능 {len(ans):,} · 무응답 {len(imp):,}")
++        print(f"    한국경제 제외 시  응답가능 {len(nonhk_ans):,} · 무응답 {len(nonhk_imp):,}")
++        print(f"    금융 평가셋 동형 목표: 응답가능 1,200 · hard UA 267 · easy UA 300")
++        ok = len(nonhk_ans) >= 1200 and len(nonhk_imp) >= 267
++        print(f"    → 한국경제 제외해도 동형 구성 {'가능' if ok else '불가 — 구성 재검토 필요'}")
++
++    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
++    json.dump(report, open(args.out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
++    print(f"\n저장: {args.out}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/data_prep/check_seq_len.py b/src/data_prep/check_seq_len.py
+new file mode 100644
+index 0000000..37bf7b4
+--- /dev/null
++++ b/src/data_prep/check_seq_len.py
+@@ -0,0 +1,72 @@
++# -*- coding: utf-8 -*-
++"""
++check_seq_len.py — 학습 전 토큰 길이 검사 (Phase 2 사전등록 §4 '지문 길이').
++
++실제 토크나이저로 (시스템 프롬프트 + 지문 + 질문 + 타깃 JSON) 길이를 재어
++max_seq_len 을 넘는 문항 수를 보고한다. 토크나이저만 내려받으므로 로컬 CPU 에서
++돌아간다 (모델 가중치 불필요). 학습·추론과 같은 prompts.build_messages /
++apply_template 을 써서 바이트 단위로 동일한 입력을 잰다.
++
++사용:
++  python src/data_prep/check_seq_len.py --config config_klue_exaone.yaml
++  python src/data_prep/check_seq_len.py --config config_klue_kanana.yaml
++"""
++import sys
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
++
++import argparse
++import json
++
++import yaml
++
++from inference.prompts import apply_template, build_messages, build_target
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--config", required=True)
++    ap.add_argument("--files", nargs="*",
++                    default=["klue_train.jsonl", "klue_train_mix_r05.jsonl", "klue_eval_full.jsonl"])
++    args = ap.parse_args()
++    cfg = yaml.safe_load(open(args.config, encoding="utf-8"))
++    max_len = cfg["train"]["max_seq_len"]
++
++    from transformers import AutoTokenizer
++    tok = AutoTokenizer.from_pretrained(cfg["model"]["base_model"],
++                                        revision=cfg["model"].get("revision"),
++                                        trust_remote_code=True)
++    enable_thinking = cfg["model"].get("enable_thinking")   # Qwen3 전용, 없으면 None
++
++    proc = Path(cfg["paths"]["processed_dir"])
++    worst = 0
++    for fn in args.files:
++        p = proc / fn
++        if not p.exists():
++            print(f"[건너뜀] {p} 없음"); continue
++        lens = []
++        for line in open(p, encoding="utf-8"):
++            r = json.loads(line)
++            prompt = apply_template(tok, build_messages(r["context"], r["question"]),
++                                    enable_thinking=enable_thinking)
++            gold = r["gold_answer"]
++            gold0 = gold[0] if isinstance(gold, list) and gold else (gold or "")
++            target = build_target(gold0, answerable=r.get("answerable", True))
++            n = len(tok(prompt + target, add_special_tokens=False)["input_ids"])
++            lens.append(n)
++        lens.sort()
++        over = sum(n > max_len for n in lens)
++        worst = max(worst, lens[-1])
++        print(f"{fn:28s} n={len(lens):5d}  중앙 {lens[len(lens)//2]:5d}  p90 {lens[int(.9*len(lens))]:5d}  "
++              f"최대 {lens[-1]:5d}  |  {max_len} 초과 {over}건 ({100*over/len(lens):.2f}%)")
++    print()
++    if worst <= max_len:
++        print(f"✓ 전 문항이 max_seq_len {max_len} 이내 — 절단 없음. 학습 진행.")
++    else:
++        print(f"✗ 초과 문항 존재. 사전등록 §4 대로 건수를 보고하고, 필요 시 "
++              f"prepare_klue.py --max-context-chars 로 제한한 뒤 재구축.")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/data_prep/prepare_klue.py b/src/data_prep/prepare_klue.py
+new file mode 100644
+index 0000000..53703d9
+--- /dev/null
++++ b/src/data_prep/prepare_klue.py
+@@ -0,0 +1,355 @@
++# -*- coding: utf-8 -*-
++"""
++prepare_klue.py — Phase 2(도메인 축 분리)용 KLUE-MRC 데이터셋 구축.
++
++금융 파이프라인과 **동형**으로 만드는 것이 목적이다. 판정 코드
++(evaluate_followup.py)를 한 줄도 바꾸지 않고 돌릴 수 있도록 question_id 규약과
++행 스키마를 그대로 따른다.
++
++  easy UA : question_id 가 'unans_' 로 시작   (ua_kind() → "easy")
++  hard UA : question_id 에 '-hd-' 포함        (ua_kind() → "hard")
++  학습 UA : question_id 에 '-trainua' 접미     (make_train_mix 규약)
++
++설계 결정 (Phase 2 사전등록 §4에 근거 기록):
++
++  [D1] 한국경제(hankyung) 출처 제외 — 기본값.
++       KLUE-MRC 원천은 위키피디아·한국경제·ACROFAN 이고, 실사 결과 한국경제가
++       train 56.4% · dev 55.8% 를 차지한다(results/klue_audit.json). 한국경제는
++       경제·금융 저널리즘이므로 남겨 두면 "금융 도메인을 떠난다"는 Phase 2 의
++       전제 자체가 무너진다. --include-hankyung 으로 2차(출처 층화) 분석 가능.
++
++  [D2] train·dev 를 합친 뒤 title 단위로 재분할.
++       KLUE 자체 분할은 train·dev 가 title 2,620개를 공유한다(실사 [7]). 금융
++       파이프라인의 문서 단위 분리 원칙을 지키려면 재분할이 불가피하다.
++
++  [D3] 답 유형은 전부 text_span.
++       KLUE-MRC 는 추출형 span 단일 유형이다. 그래서 붕괴 판별의 비교 기준도
++       금융의 4유형 집계(-0.346)가 아니라 text_span 한정값(-0.303)이어야 한다
++       (results/comparator_textspan.json).
++
++  [D4] 학습 무응답 예시는 KLUE 의 is_impossible 을 쓰지 않고 **교차 지문**으로 만든다.
++       금융에서 학습 무응답은 교차 지문(easy)만 사용했고(make_train_mix.py 주석),
++       그 덕분에 hard UA 복원이 "훈련 분포 밖 일반화"로 해석된다. KLUE 의 사람이
++       쓴 적대적 무응답을 학습에 넣으면 처치 자체가 달라져 도메인만 바꾼 대조가
++       아니게 되고, hard UA 의 OOD 성질도 사라진다.
++
++  [D5] hard UA = KLUE 네이티브 is_impossible (question_type 3).
++       금융의 근거제거·대상치환과는 다른 종류의 hard 이므로 복원 깊이를 도메인 간에
++       직접 비교하지 않는다. Phase 2 의 1차 종점(붕괴 여부)은 응답가능 문항에서만
++       측정되므로 이 비대칭은 주 판정에 영향을 주지 않는다.
++
++  [D6] 응답가능 평가 1,200건 — 금융(1,170)과 동형.
++       n=300 으로 줄이면 ΔEM 의 95% CI 반폭이 0.023~0.027 로 넓어져 H2 문턱
++       (-0.03)에 걸린다. 실제로 무손실 모델을 금융 text_span(n=300)만으로 판정하면
++       Qwen3 2/3 · Llama 1/3 로 떨어진다(comparator 산출). 검정력을 금융과 맞추려면
++       1,200건이 필요하다.
++
++사용:
++  python src/data_prep/prepare_klue.py --klue-dir <KLUE>/klue_benchmark/klue-mrc-v1.1
++출력:
++  data/processed/klue_train.jsonl          (응답가능 3,000)
++  data/processed/klue_train_mix_r05.jsonl  (3,000 중 150건을 교차지문 UA 로 교체)
++  data/processed/klue_eval_full.jsonl      (응답가능 1,200 + easy UA 300 + hard UA 267)
++  data/processed/klue_manifest.json        (무결성 검사 결과)
++"""
++import argparse
++import hashlib
++import json
++import random
++import string
++import unicodedata
++from collections import Counter, defaultdict
++from pathlib import Path
++
++
++# ---------------------------------------------------------------- 정규화 (prepare_data._norm 과 동일)
++_PUNCT = set(string.punctuation) | {"·", "…", "「", "」", "『", "』", "%"}
++
++
++def _norm(text):
++    text = unicodedata.normalize("NFKC", str(text)).lower()
++    return "".join(ch for ch in text if not ch.isspace() and ch not in _PUNCT)
++
++
++def doc_id_of(title):
++    return "klue-" + hashlib.sha1(title.encode("utf-8")).hexdigest()[:12]
++
++
++# ---------------------------------------------------------------- 로드
++def load_klue(klue_dir, exclude_sources, max_ctx_chars):
++    """train·dev 를 합쳐 문항 단위로 평탄화한다 (D2)."""
++    rows, dropped = [], Counter()
++    for fn in ("klue-mrc-v1.1_train.json", "klue-mrc-v1.1_dev.json"):
++        p = Path(klue_dir) / fn
++        if not p.exists():
++            raise SystemExit(f"KLUE 파일 없음: {p}")
++        data = json.load(open(p, encoding="utf-8"))
++        for art in data["data"]:
++            src = art.get("source")
++            if src in exclude_sources:
++                dropped[f"source:{src}"] += sum(len(pa["qas"]) for pa in art["paragraphs"])
++                continue
++            for para in art["paragraphs"]:
++                ctx = para["context"]
++                if max_ctx_chars and len(ctx) > max_ctx_chars:
++                    dropped["context_too_long"] += len(para["qas"])
++                    continue
++                for qa in para["qas"]:
++                    golds = []
++                    for a in qa.get("answers", []):
++                        t = a.get("text", "")
++                        if t and t not in golds:
++                            golds.append(t)
++                    if not qa["is_impossible"] and not golds:
++                        dropped["no_gold"] += 1
++                        continue
++                    rows.append({
++                        "guid": qa["guid"],
++                        "title": art["title"],
++                        "doc_id": doc_id_of(art["title"]),
++                        "source": src,
++                        "news_category": art.get("news_category"),
++                        "klue_qtype": qa["question_type"],
++                        "is_impossible": qa["is_impossible"],
++                        "context": ctx,
++                        "question": qa["question"],
++                        "golds": golds,
++                    })
++    print(f"[로드] {len(rows):,}건 · 제외 {dict(dropped)}")
++    return rows
++
++
++# ---------------------------------------------------------------- 분할 (D2)
++def split_by_title(rows, n_eval_ans, n_train_ans, n_hard, rng):
++    """title 단위로 평가/학습 문서를 먼저 가르고, 그 안에서 정원을 채운다.
++
++    문서를 섞은 뒤 평가 정원(응답가능 + 무응답)이 찰 때까지 '문서 전체'를 평가측에
++    배정한다. 나머지 문서가 학습 풀이 된다 — 같은 title 이 양쪽에 오지 않는다.
++    """
++    by_doc = defaultdict(list)
++    for r in rows:
++        by_doc[r["doc_id"]].append(r)
++    docs = list(by_doc)
++    rng.shuffle(docs)
++
++    eval_docs, train_docs = [], []
++    n_a = n_i = 0
++    for d in docs:
++        grp = by_doc[d]
++        if n_a < n_eval_ans or n_i < n_hard:
++            eval_docs.append(d)
++            n_a += sum(not r["is_impossible"] for r in grp)
++            n_i += sum(r["is_impossible"] for r in grp)
++        else:
++            train_docs.append(d)
++
++    ev = [r for d in eval_docs for r in by_doc[d]]
++    tr = [r for d in train_docs for r in by_doc[d]]
++
++    ev_ans = [r for r in ev if not r["is_impossible"]]
++    ev_imp = [r for r in ev if r["is_impossible"]]
++    tr_ans = [r for r in tr if not r["is_impossible"]]
++    rng.shuffle(ev_ans); rng.shuffle(ev_imp); rng.shuffle(tr_ans)
++
++    for name, have, want in (("평가 응답가능", len(ev_ans), n_eval_ans),
++                             ("hard UA", len(ev_imp), n_hard),
++                             ("학습 응답가능", len(tr_ans), n_train_ans)):
++        if have < want:
++            raise SystemExit(f"{name} 부족: {have} < {want} — 제외 조건을 완화하거나 정원을 낮출 것")
++    return ev_ans[:n_eval_ans], ev_imp[:n_hard], tr_ans[:n_train_ans]
++
++
++# ---------------------------------------------------------------- 행 변환
++def to_answerable(r):
++    """gold_answer 를 리스트로 둔다 — 채점기의 max-over-golds 분기가 받는다."""
++    return {
++        "question_id": r["guid"],
++        "doc_id": r["doc_id"],
++        "type": "text_span",                      # D3
++        "context": r["context"],
++        "question": r["question"],
++        "gold_answer": r["golds"],                # ★ 복수 정답 (KLUE 응답가능의 35.5%)
++        "answerable": True,
++        "klue_qtype": r["klue_qtype"],
++        "source": r["source"],
++    }
++
++
++def to_hard_ua(r):
++    """KLUE 네이티브 무응답 (D5). question_id 에 '-hd-' 를 넣어 ua_kind()가 hard 로 읽게 한다."""
++    return {
++        "question_id": f"{r['guid']}-hd-na",      # na = native adversarial
++        "doc_id": r["doc_id"],
++        "type": "unanswerable",
++        "ua_kind": "hard_klue_native",
++        "orig_type": "text_span",
++        "context": r["context"],
++        "question": r["question"],
++        "gold_answer": "",
++        "orig_gold": None,
++        "answerable": False,
++        "klue_qtype": r["klue_qtype"],
++        "source": r["source"],
++    }
++
++
++# ---------------------------------------------------------------- 교차 지문 UA (D4)
++def cross_pair(targets, context_pool, rng, id_fn, max_tries=30):
++    """금융 make_unanswerable 과 동일한 규칙: 다른 문서의 지문으로 교체하되,
++    교체 지문에 정답 문자열이 우연히 들어 있으면 재시도한다.
++    KLUE 는 정답이 여럿이므로 **모든** gold 가 부재해야 통과시킨다(더 보수적)."""
++    out, failed = [], 0
++    for r in targets:
++        gold_ns = [g for g in (_norm(x) for x in r["golds"]) if g]
++        swapped = None
++        for _ in range(max_tries):
++            cand = context_pool[rng.randrange(len(context_pool))]
++            if cand["doc_id"] == r["doc_id"]:
++                continue
++            cn = _norm(cand["context"])
++            if any(g in cn for g in gold_ns):
++                continue
++            swapped = cand
++            break
++        if swapped is None:
++            failed += 1
++            continue
++        out.append({
++            "question_id": id_fn(r["guid"]),
++            "doc_id": r["doc_id"],
++            "type": "unanswerable",
++            "orig_type": "text_span",
++            "context": swapped["context"],
++            "question": r["question"],
++            "gold_answer": "",
++            "orig_gold": r["golds"][0] if r["golds"] else None,
++            "ctx_doc_id": swapped["doc_id"],
++            "answerable": False,
++            "klue_qtype": r["klue_qtype"],
++            "source": r["source"],
++        })
++    if failed:
++        print(f"[경고] 교차 지문 생성 실패 {failed}건")
++    return out
++
++
++def make_train_ua(train_rows, n_replace, rng):
++    """학습셋 3,000건 중 n_replace 건을 교차 지문 UA 로 '교체'한다.
++    총량·질문 집합·행 순서를 보존하는 make_train_mix.py 의 설계 특성을 그대로 따른다."""
++    idx = list(range(len(train_rows)))
++    rng.shuffle(idx)
++    chosen = sorted(idx[:n_replace])
++    pool = [{"doc_id": r["doc_id"], "context": r["context"]} for r in train_rows]
++    ua = cross_pair([train_rows[i] for i in chosen], pool, rng,
++                    id_fn=lambda g: f"{g}-trainua")
++    if len(ua) != n_replace:
++        raise SystemExit(f"학습 UA 생성 부족: {len(ua)} < {n_replace}")
++    mix = [to_answerable(r) for r in train_rows]
++    for pos, row in zip(chosen, ua):
++        row_keep = dict(row)
++        row_keep["type"] = "text_span"     # 유형 비율 보존 (금융 train_mix 와 동일)
++        mix[pos] = row_keep
++    return mix, chosen
++
++
++# ---------------------------------------------------------------- 출력
++def write_jsonl(path, rows):
++    Path(path).parent.mkdir(parents=True, exist_ok=True)
++    with open(path, "w", encoding="utf-8") as f:
++        for r in rows:
++            f.write(json.dumps(r, ensure_ascii=False) + "\n")
++    print(f"저장: {path} ({len(rows):,}건)")
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--klue-dir", required=True)
++    ap.add_argument("--out-dir", default="data/processed")
++    ap.add_argument("--seed", type=int, default=42)
++    ap.add_argument("--include-hankyung", action="store_true",
++                    help="D1 해제 — 출처 층화 2차 분석용")
++    ap.add_argument("--max-context-chars", type=int, default=0,
++                    help="0 = 제한 없음. 학습 전 실제 토크나이저로 길이를 반드시 확인할 것")
++    ap.add_argument("--n-train", type=int, default=3000)
++    ap.add_argument("--n-eval-answerable", type=int, default=1200)
++    ap.add_argument("--n-easy-ua", type=int, default=300)
++    ap.add_argument("--n-hard-ua", type=int, default=267)
++    ap.add_argument("--n-train-ua", type=int, default=150)   # r05
++    args = ap.parse_args()
++
++    rng = random.Random(args.seed)
++    exclude = set() if args.include_hankyung else {"hankyung"}
++    print(f"[D1] 제외 출처: {exclude or '없음 (2차 분석 모드)'}")
++
++    rows = load_klue(args.klue_dir, exclude, args.max_context_chars)
++    ev_ans, ev_imp, tr_ans = split_by_title(
++        rows, args.n_eval_answerable, args.n_train, args.n_hard_ua, rng)
++
++    # --- 문서 누출 검증 (금융 prepare_data 의 assert 와 동일 원칙)
++    tr_docs = {r["doc_id"] for r in tr_ans}
++    ev_docs = {r["doc_id"] for r in ev_ans} | {r["doc_id"] for r in ev_imp}
++    overlap = tr_docs & ev_docs
++    assert not overlap, f"문서 누출 발생: {len(overlap)}개"
++    print(f"[검증] 문서 누출 없음 (학습 {len(tr_docs):,}문서 · 평가 {len(ev_docs):,}문서)")
++
++    # --- easy UA: 평가측 응답가능 문항을 평가측 지문끼리 교차 (금융과 동일 규칙)
++    ev_pool = [{"doc_id": r["doc_id"], "context": r["context"]} for r in ev_ans]
++    easy_src = ev_ans[:]
++    rng.shuffle(easy_src)
++    easy = cross_pair(easy_src[:int(args.n_easy_ua * 1.3)], ev_pool, rng,
++                      id_fn=lambda g: f"unans_{g}")[:args.n_easy_ua]
++    if len(easy) < args.n_easy_ua:
++        raise SystemExit(f"easy UA 부족: {len(easy)} < {args.n_easy_ua}")
++
++    hard = [to_hard_ua(r) for r in ev_imp]
++    eval_full = [to_answerable(r) for r in ev_ans] + easy + hard
++
++    # --- 학습셋 / 혼입셋
++    train = [to_answerable(r) for r in tr_ans]
++    mix, replaced = make_train_ua(tr_ans, args.n_train_ua, rng)
++
++    out = Path(args.out_dir)
++    write_jsonl(out / "klue_train.jsonl", train)
++    write_jsonl(out / "klue_train_mix_r05.jsonl", mix)
++    write_jsonl(out / "klue_eval_full.jsonl", eval_full)
++
++    # --- 매니페스트 / 무결성
++    n_multi = sum(len(r["gold_answer"]) > 1 for r in eval_full if r["answerable"])
++    ctx_len = sorted(len(r["context"]) for r in eval_full)
++    manifest = {
++        "seed": args.seed,
++        "excluded_sources": sorted(exclude),
++        "counts": {
++            "train": len(train), "train_mix_r05": len(mix),
++            "train_ua_replaced": len(replaced),
++            "eval_answerable": len(ev_ans), "eval_easy_ua": len(easy),
++            "eval_hard_ua": len(hard), "eval_total": len(eval_full),
++        },
++        "doc_leakage": len(overlap),
++        "eval_multi_gold": n_multi,
++        "eval_context_chars": {"median": ctx_len[len(ctx_len) // 2],
++                               "p90": ctx_len[int(0.9 * len(ctx_len))],
++                               "max": ctx_len[-1]},
++        "source_mix_eval": dict(Counter(r.get("source") for r in eval_full)),
++        "klue_qtype_eval": dict(Counter(r.get("klue_qtype") for r in eval_full)),
++        "id_conventions": {"easy": "unans_*", "hard": "*-hd-na", "train_ua": "*-trainua"},
++    }
++    json.dump(manifest, open(out / "klue_manifest.json", "w", encoding="utf-8"),
++              ensure_ascii=False, indent=2)
++
++    print("\n=== 구성 ===")
++    print(f"  학습 응답가능      {len(train):,}")
++    print(f"  학습 혼입 r05      {len(mix):,} (무응답 교체 {len(replaced)}건, 총량·질문집합 불변)")
++    print(f"  평가 응답가능      {len(ev_ans):,}  (복수 정답 {n_multi:,}건)")
++    print(f"  평가 easy UA       {len(easy):,}  (교차 지문)")
++    print(f"  평가 hard UA       {len(hard):,}  (KLUE 네이티브 is_impossible)")
++    print(f"  평가 합계          {len(eval_full):,}")
++    print(f"  지문 길이(문자)    중앙 {manifest['eval_context_chars']['median']} · "
++          f"p90 {manifest['eval_context_chars']['p90']} · 최대 {manifest['eval_context_chars']['max']}")
++    print(f"\n저장: {out / 'klue_manifest.json'}")
++    print("\n★ 학습 전 확인: 실제 토크나이저로 (시스템프롬프트+지문+질문+타깃) 길이가")
++    print("  max_seq_len 2048 을 넘지 않는지 표본 검사할 것. 넘으면 --max-context-chars 로 제한.")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/src/evaluation/evaluate.py b/src/evaluation/evaluate.py
+index 5ee6869..e4b8ea5 100644
+--- a/src/evaluation/evaluate.py
++++ b/src/evaluation/evaluate.py
+@@ -78,6 +78,10 @@ def extract_numbers(text):
+ 
+ 
+ def is_correct(pred, gold, qtype, tol):
++    # KLUE-MRC 확장(Phase 2): gold 가 복수 정답 리스트인 경우 max-over-golds.
++    # 금융 데이터의 gold_answer 는 항상 문자열이므로 이 분기는 발동하지 않는다.
++    if isinstance(gold, (list, tuple)):
++        return any(is_correct(pred, g, qtype, tol) for g in gold)
+     if qtype == "numeric_reasoning":
+         gold_nums, pred_nums = extract_numbers(gold), extract_numbers(pred)
+         if gold_nums and pred_nums:
+diff --git a/src/evaluation/evaluate_followup.py b/src/evaluation/evaluate_followup.py
+index f6ab98b..9d03b74 100644
+--- a/src/evaluation/evaluate_followup.py
++++ b/src/evaluation/evaluate_followup.py
+@@ -63,6 +63,11 @@ def extract_numbers(text):
+ 
+ 
+ def is_correct(pred, gold, qtype, tol):
++    # KLUE-MRC 확장(Phase 2): gold 가 복수 정답 리스트인 경우 max-over-golds.
++    # 금융 데이터의 gold_answer 는 항상 문자열이므로 이 분기는 발동하지 않으며,
++    # 금융 판정 결과는 바이트 단위로 보존된다(regress_finance.py 가 검증).
++    if isinstance(gold, (list, tuple)):
++        return any(is_correct(pred, g, qtype, tol) for g in gold)
+     if qtype == "numeric_reasoning":
+         gold_nums, pred_nums = extract_numbers(gold), extract_numbers(pred)
+         if gold_nums and pred_nums:
+diff --git a/src/evaluation/regress_finance.py b/src/evaluation/regress_finance.py
+new file mode 100644
+index 0000000..0fc90b4
+--- /dev/null
++++ b/src/evaluation/regress_finance.py
+@@ -0,0 +1,85 @@
++# -*- coding: utf-8 -*-
++"""
++regress_finance.py — 금융 판정 결과가 Phase 2 코드 변경 이후에도 불변임을 증명한다.
++
++Phase 2 를 위해 채점기 is_correct() 에 딱 하나의 분기를 넣었다 — gold 가 리스트면
++max-over-golds. KLUE-MRC 응답가능 문항의 35.5%가 복수 정답을 갖기 때문이다.
++금융 데이터의 gold_answer 는 항상 문자열이므로 이 분기는 발동하지 않아야 하고,
++이 스크립트가 그 사실을 판정 산출물 전체 비교로 확인한다.
++
++사전등록 원칙상 "채점 코드는 손대지 않는다"를 깨는 변경이므로, 변경과 함께 이
++검증을 커밋해 판정 불변성을 기록으로 남긴다.
++
++사용:
++  # 1) 변경 전 커밋에서 산출된 metrics 를 기준본으로 보관
++  cp results/metrics_followup_r05.json results/metrics_followup_r05.ref.json
++  # 2) 변경 후 재산출 (반드시 사전등록 확정 신호 m1_conf 로)
++  python src/evaluation/evaluate_followup.py --h4-signal m1_conf
++  # 3) 비교
++  python src/evaluation/regress_finance.py
++
++  종료 코드 0 = 판정 불변, 1 = 불일치(원인 확인 전 Phase 2 진행 금지)
++"""
++import argparse
++import json
++import sys
++from pathlib import Path
++
++# 격자 실행 시 추가된 기록 필드(6.2절). 판정에 쓰이지 않으므로 비교에서 제외한다.
++IGNORE_PREFIXES = ("/settings/m2_files", "/settings/m2_glob", "/settings/m1_glob")
++TOL = 1e-12
++
++
++def flatten(o, p=""):
++    if isinstance(o, dict):
++        for k, v in o.items():
++            yield from flatten(v, f"{p}/{k}")
++    elif isinstance(o, list):
++        for i, v in enumerate(o):
++            yield from flatten(v, f"{p}[{i}]")
++    else:
++        yield p, o
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--ref", default="results/metrics_followup_r05.ref.json")
++    ap.add_argument("--new", default="results/metrics_followup_r05.json")
++    args = ap.parse_args()
++
++    for p in (args.ref, args.new):
++        if not Path(p).exists():
++            raise SystemExit(f"파일 없음: {p} (사용법은 docstring 참조)")
++
++    a = dict(flatten(json.load(open(args.ref, encoding="utf-8"))))
++    b = dict(flatten(json.load(open(args.new, encoding="utf-8"))))
++
++    keys = [k for k in sorted(set(a) | set(b))
++            if not any(k.startswith(x) for x in IGNORE_PREFIXES)]
++    diffs = []
++    for k in keys:
++        x, y = a.get(k), b.get(k)
++        if (isinstance(x, (int, float)) and isinstance(y, (int, float))
++                and not isinstance(x, bool) and not isinstance(y, bool)):
++            if abs(x - y) > TOL:
++                diffs.append((k, x, y))
++        elif x != y:
++            diffs.append((k, x, y))
++
++    print(f"기준본 {args.ref}\n신규본 {args.new}")
++    print(f"판정 관련 비교 항목 {len(keys):,}개 · 불일치 {len(diffs)}개")
++    if diffs:
++        for k, x, y in diffs[:30]:
++            print(f"  {k} | {x} -> {y}")
++        if len(diffs) > 30:
++            print(f"  ... 외 {len(diffs) - 30}개")
++        print("\n✗ 판정이 변했다. Phase 2 진행 전에 원인을 규명할 것.")
++        sys.exit(1)
++
++    print("\n✓ 판정 불변 — is_correct 의 max-over-golds 분기는 금융 경로에서 발동하지 않는다.")
++    print("  (H1~H5 점추정·CI, risk-coverage, 운영점 전 항목 1e-12 이내 일치)")
++    sys.exit(0)
++
++
++if __name__ == "__main__":
++    main()
