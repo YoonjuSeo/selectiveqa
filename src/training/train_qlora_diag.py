@@ -76,7 +76,7 @@ from inference.prompts import build_messages, build_target, apply_template
 # 수 없었다(2026-09-24 M2-r05 진단 재학습에서 실제로 이 문제로 한 번 재실행이 필요했음).
 # 이 문자열은 (1) main() 시작 시 콘솔에 찍히고 (2) 매 JSONL 레코드에도 실려서, 나중에
 # 로그 파일만 봐도 어떤 스키마로 기록됐는지 바로 확인할 수 있게 한다.
-SCHEMA_VERSION = "tier1-prereg-v1.1-per-step-field-content"
+SCHEMA_VERSION = "tier1-prereg-v1.2-per-step-field-content-microloss"
 
 
 def load_config(path="config.yaml"):
@@ -230,6 +230,10 @@ class UASplitTrainer(Trainer):
             "tok_ans_field": 0.0, "sum_loss_ans_field": 0.0,
             "tok_ans_content": 0.0, "sum_loss_ans_content": 0.0,
             "example_ids": [],
+            "micro_loss": [],  # Tier1 부록(docs/prereg_tier1_addendum_qwen3_260926.md) 3절:
+                                # compute_loss가 반환하는 예제별(micro-batch=1) 토큰정규화
+                                # loss. batch_size=1이라 이 값이 곧 per_example_loss[i]다.
+                                # 5절 콜백 검증(2단계, Trainer loss_total 재구성)에 쓴다.
         }
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
@@ -264,6 +268,7 @@ class UASplitTrainer(Trainer):
             n_tok = tok_mask[i].sum().item()
             s_loss = (per_token_loss[i] * tok_mask[i]).sum().item()
             t["example_ids"].append(example_ids[i])
+            t["micro_loss"].append(per_example_loss[i].item())
             if is_ans:
                 t["n_ans"] += 1
                 t["tok_ans"] += n_tok
@@ -315,13 +320,25 @@ class LossFlushCallback(TrainerCallback):
             "loss_total": logs.get("loss"),
             "grad_norm": logs.get("grad_norm"),
             "example_ids": t["example_ids"],
+            "micro_loss": t["micro_loss"],
         }
         with open(self.out_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
         gap = (ans_mean - ua_mean) if (ans_mean is not None and ua_mean is not None) else None
+        micro = t["micro_loss"]
+        micro_mean = (sum(micro) / len(micro)) if micro else None
+        loss_total = record["loss_total"]
+        # 부록 3절 검증 2단계: 이 step의 micro_loss 산술평균이 loss_total과 1e-4 이내로
+        # 일치해야 한다(batch_size=1, grad_accum=N이면 loss_total은 이 step에 든
+        # micro-batch 수만큼의 micro_loss를 단순 평균한 값이므로).
+        if micro_mean is not None and loss_total is not None:
+            diff = abs(micro_mean - loss_total)
+            flag = "OK" if diff < 1e-4 else "MISMATCH"
+            print(f"[검증-2단계] step={state.global_step} micro_mean={micro_mean:.6f} "
+                  f"loss_total={loss_total:.6f} diff={diff:.6f} -> {flag}")
         print(f"[loss-split] step={state.global_step} ua_mean={ua_mean} ans_mean={ans_mean} "
-              f"gap={gap} loss_total={record['loss_total']} grad_norm={record['grad_norm']} "
+              f"gap={gap} loss_total={loss_total} grad_norm={record['grad_norm']} "
               f"(n_ua={t['n_ua']}, n_ans={t['n_ans']})")
 
         trainer._reset_tracker()

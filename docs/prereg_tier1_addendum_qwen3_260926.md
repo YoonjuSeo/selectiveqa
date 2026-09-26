@@ -178,11 +178,14 @@ SD_Qwen3가 0.0212보다 크면 s가 커지고, 이에 따라 S2a·S2c 경계는
 
 ## 8. 실행 전 체크리스트
 
-- [ ] 이 부록의 `[확인 필요]` 채우기
+- [x] EXAONE `--check-spans 5` 출력 확보(부록 A.1)
+- [x] Q1 실행 출처 확정(`_r05_diag`, 2.3절)
+- [x] Trainer loss 집계 방식 확정(3절)
+- [x] "제외 34건" 원인 규명 — 로그 버그, Q1 결과 영향 없음(2.3절)
 - [ ] `docs/prereg_tier1_260924.md`와 이 부록을 커밋하고 해시를 기입
-- [ ] 3절 로깅 코드 반영, `SCHEMA_VERSION` 올리기, dry run 검증 통과
-- [ ] Qwen3 `--check-spans 5` 출력을 부록 A에 첨부(비사고 모드의 빈 `<think>` 블록이 타깃 구간에 섞이지 않는지 확인)
-- [ ] 2.3절 EXAONE 정리(Q1 30건 재산출, 실행 출처 표)
+- [ ] (선택) `load_exclusions()`의 메타데이터 오카운트 버그 수정
+- [ ] 3절 로깅 코드 반영(`micro_loss` 기록), `SCHEMA_VERSION` 올리기, dry run 검증 통과
+- [ ] Qwen3 `--check-spans 5` 출력을 부록 A.2에 첨부(비사고 모드의 빈 `<think>` 블록이 타깃 구간에 섞이지 않는지 확인)
 - [ ] Qwen3 M1 진단, M2-r05 진단 학습
 - [ ] 분석 순서: 3절 검증 → Q1 → Q2 → Q3 → Q4 → Q5 (원문 5절)
 
@@ -233,6 +236,31 @@ offset_mapping 지원 여부: True
 
 확인: `"answerable": true/false`, `{`, `}`, 필드명, 종결 토큰은 field로, `answer`·`evidence_span`의 값(숫자·기관명 등)만 content로 정확히 분리됨. UA 예제(id=2)는 전부 field(`null`뿐이므로 content 없음)로 처리되어 정의와 일치.
 
-### A.2 Qwen3
+### A.2 Qwen3 (완료, config_qwen3.yaml, seed 42)
 
-`[학습 전 --check-spans 5 --config config_qwen3.yaml 출력 첨부: 비사고 모드(enable_thinking=False)에서 빈 <think> 블록이나 관련 토큰이 타깃 구간에 섞이지 않는지 특히 확인]`
+```
+[스키마 확인] train_qlora_diag.py SCHEMA_VERSION=tier1-prereg-v1.2-per-step-field-content-microloss
+학습 시드: 42
+offset_mapping 지원 여부: True
+
+=== 예제 0 (id=0, answerable=True) ===
+[{"] [answer] [able] [":] [ true] [,] [ "] [answer] [":] [ "]* [2]* [4]* [2]* [9]* [8]* [0]* [0]* [0]* [0]* [0]* [0]* [0]* [0]* [원]* [",]* [ "] [e] [vidence] [_span] [":] [ "]* [2]* [4]* [2]* [9]* [8]* [0]* [0]* [0]* [0]* [0]* [0]* [0]* [0]* [원]* ["}]* [<|im_end|>]
+
+=== 예제 1 (id=1, answerable=True) ===
+[{"] [answer] [able] [":] [ true] [,] [ "] [answer] [":] [ "]* [4]* [6]* [0]* [",]* [ "] [e] [vidence] [_span] [":] [ "]* [4]* [6]* [0]* ["}]* [<|im_end|>]
+
+=== 예제 2 (id=2, answerable=False) ===
+[{"] [answer] [able] [":] [ false] [,] [ "] [answer] [":] [ null] [,] [ "] [e] [vidence] [_span] [":] [ null] [}] [<|im_end|>]
+
+=== 예제 3 (id=3, answerable=True) ===
+[{"] [answer] [able] [":] [ true] [,] [ "] [answer] [":] [ "]* [7]* [5]* [.]* [4]* [5]* [%",]* [ "] [e] [vidence] [_span] [":] [ "]* [7]* [5]* [.]* [4]* [5]* [%]* ["}]* [<|im_end|>]
+
+=== 예제 4 (id=4, answerable=True) ===
+[{"] [answer] [able] [":] [ true] [,] [ "] [answer] [":] [ "]* [K]* [TB]* [글]* [로]* [벌]* [테]* [마]* [AI]* [셀]* [렉]* [션]* [펀]* [드]* [",]* [ "] [e] [vidence] [_span] [":] [ "]* [K]* [TB]* [글]* [로]* [벌]* [테]* [마]* [AI]* [셀]* [렉]* [션]* [펀]* [드]* ["}]* [<|im_end|>]
+```
+
+확인: 스키마 버전이 `v1.2-...-microloss`로 찍혀 `micro_loss` 로깅 코드(2.1절 이후 추가분)가 배포됨을 확인. field/content 분리는 EXAONE(A.1)과 같은 패턴 — `"answerable": true/false`, `{`, `}`, 필드명은 field, `answer`·`evidence_span` 값만 content. UA 예제(id=2)는 전부 field로 처리되어 정의와 일치. 종결 토큰은 Qwen3 고유의 `<|im_end|>`(EXAONE의 `[|endofturn|]`에 대응)이며 field로 정상 분류됨.
+
+**경계 토큰 관찰(두 모델 공통, 조치 불필요):** `%",`, `["}]`처럼 값의 마지막 글자와 닫는 따옴표·쉼표·중괄호가 BPE 토크나이저에 의해 한 토큰으로 합쳐진 경우, 그 토큰 전체가 content로 분류된다(EXAONE A.1에서도 `",` 토큰이 동일하게 content로 표시됨). 이는 문자 오프셋을 토큰 단위로 매핑하는 방법(사전등록 3절)의 정밀도 한계이며, 두 모델에 동일하게 적용되므로 ρ_content 비교에 영향을 주지 않는다.
+
+**확인 범위의 한계:** 이 출력은 **타깃(레이블) 구간만** 보여준다. 비사고 모드에서 우려했던 빈 `<think>` 블록은 통상 프롬프트(어시스턴트 턴 시작부)에 삽입되는데, 프롬프트 토큰은 loss 계산에서 마스킹되므로(원문 2.3절, 3.5절) G·ρ_content 산출에는 영향이 없다. 확인이 더 필요하면 프롬프트 원문을 별도로 출력해 눈으로 확인한다(선택).
