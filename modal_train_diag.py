@@ -63,11 +63,22 @@ CONFIG_MAP = {
     timeout=8 * 60 * 60,
 )
 def train_diag(args: list):
+    import json
     import os
     import subprocess
     import sys
+    from pathlib import Path
 
     os.chdir("/root/proj")
+
+    # 학습 시작 전, 이미지에 번들링된 스크립트의 스키마 버전을 먼저 확인한다.
+    # 모델 로딩(수십 초~분)까지 기다릴 필요 없이 몇 초 안에 구버전 재배포 사고를
+    # 잡아낼 수 있다 — 2026-09-24 M2-r05 진단 재학습에서 이걸 놓쳐 2시간짜리 실행을
+    # 통째로 버린 적이 있어서 추가함.
+    sys.path.insert(0, "src")
+    from training.train_qlora_diag import SCHEMA_VERSION
+    print(f"[스키마 확인] 번들링된 train_qlora_diag.py SCHEMA_VERSION={SCHEMA_VERSION}")
+
     cmd = [sys.executable, "src/training/train_qlora_diag.py"] + args
     print("실행:", " ".join(cmd))
     try:
@@ -76,6 +87,40 @@ def train_diag(args: list):
         results_vol.commit()
     if result.returncode != 0:
         raise RuntimeError(f"진단 학습 스크립트 비정상 종료 (code={result.returncode})")
+
+    # 학습이 정상 종료돼도, 실제로 저장된 로그가 새 스키마인지 다시 한번 확인한다
+    # (스크립트 버전 확인만으로는 못 잡는, 예컨대 캐시된 이전 실행 파일 재사용 같은
+    # 경우까지 대비).
+    def arg_val(flag, default):
+        return args[args.index(flag) + 1] if flag in args else default
+
+    tag = arg_val("--tag", "_r05_diag")
+    seed = arg_val("--seed", "42")
+    results_dir = Path("results")
+    # exaone 외 모델은 results_dir가 results/<model>일 수 있으나, 이 스크립트는
+    # cfg["paths"]["results_dir"] 그대로 쓰므로 config에 맞춰 경로가 정해진다.
+    import yaml
+    cfg_path = arg_val("--config", "config.yaml")
+    with open(cfg_path, encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    log_path = Path(cfg["paths"]["results_dir"]) / f"tier1_loss_log{tag}_s{seed}.jsonl"
+
+    if log_path.exists():
+        with open(log_path, encoding="utf-8") as f:
+            first_line = f.readline()
+        first_record = json.loads(first_line) if first_line.strip() else {}
+        if first_record.get("schema_version") != SCHEMA_VERSION or "tok_ans_field" not in first_record:
+            raise RuntimeError(
+                f"학습은 끝났지만 저장된 로그({log_path})가 신규 스키마가 아닙니다 "
+                f"(schema_version={first_record.get('schema_version')!r}). "
+                "Q2/Q4 계산에 못 쓰는 로그이니 재배포 상태를 먼저 확인하세요."
+            )
+        print(f"[스키마 확인] 저장된 로그({log_path})가 신규 스키마 정상 확인됨 "
+              f"— schema_version={first_record['schema_version']}, "
+              f"tok_ans_field 키 존재")
+    else:
+        print(f"[경고] 예상 로그 경로를 찾지 못함: {log_path} (results_dir 설정을 확인하세요)")
+
     print("✓ 완료. `modal volume get selectiveqa-results <파일/폴더명> ./results` 로 회수하세요.")
 
 

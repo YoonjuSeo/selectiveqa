@@ -12,3 +12,4 @@ results/qwen3/qlora_adapter*/
 cmp_filled.py
 stage1_ablation.patch
 results/**/qlora_adapter*/
+results/tier1/

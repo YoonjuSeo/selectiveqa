@@ -124,21 +124,26 @@ def load_preds(path):
 
 
 def load_exclusions(res_dir, names):
-    """excluded_gold_v2*.json 에서 제외 question_id 집합을 유연하게 수집."""
+    """excluded_gold_v2*.json 의 question_ids 필드만 읽어 제외 question_id 집합을 수집.
+
+    2026-09-26 수정: 이전 버전은 dict의 모든 문자열 값(rule/date/judged_by 등
+    메타데이터)까지 question_id로 오인해 합산했다(예: excluded_gold_v2.json 실제
+    24건인데 콘솔에는 25건, excluded_gold_v2_manual.json 포함 누적은 30건인데
+    34건으로 표시됨). 가짜 id가 실제 예측 파일의 question_id와 겹치지 않아
+    차집합 결과(최종 n, ΔEM 등)에는 영향이 없었으나, 표기 오류이므로 바로잡는다.
+    상세: docs/prereg_tier1_addendum_qwen3_260926.md 2.3절,
+    src/analysis/comparator_textspan.py의 load_exclusions_strict 참고.
+    """
     ids = set()
     for name in names:
         p = Path(res_dir) / name
         if not p.exists():
             continue
         data = json.load(open(p, encoding="utf-8"))
-        items = data.values() if isinstance(data, dict) else data
-        for it in items:
-            if isinstance(it, str):
-                ids.add(it)
-            elif isinstance(it, dict) and "question_id" in it:
-                ids.add(it["question_id"])
-            elif isinstance(it, list):
-                ids.update(x for x in it if isinstance(x, str))
+        if isinstance(data, dict):
+            ids.update(x for x in data.get("question_ids", []) if isinstance(x, str))
+        elif isinstance(data, list):
+            ids.update(x for x in data if isinstance(x, str))
         print(f"[제외] {name}: 누적 {len(ids)}건")
     return ids
 

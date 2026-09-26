@@ -71,6 +71,13 @@ from transformers import (
 
 from inference.prompts import build_messages, build_target, apply_template
 
+# 사전등록 3절 로깅 스키마 버전 — 매 optimizer step, field/content 분리, grad_norm 포함.
+# 예전(구) 버전은 20-step마다 ua_loss_mean/ans_loss_mean만 기록해 G·ρ_content를 계산할
+# 수 없었다(2026-09-24 M2-r05 진단 재학습에서 실제로 이 문제로 한 번 재실행이 필요했음).
+# 이 문자열은 (1) main() 시작 시 콘솔에 찍히고 (2) 매 JSONL 레코드에도 실려서, 나중에
+# 로그 파일만 봐도 어떤 스키마로 기록됐는지 바로 확인할 수 있게 한다.
+SCHEMA_VERSION = "tier1-prereg-v1.1-per-step-field-content"
+
 
 def load_config(path="config.yaml"):
     with open(path, encoding="utf-8") as f:
@@ -297,6 +304,7 @@ class LossFlushCallback(TrainerCallback):
         ans_mean = (t["sum_loss_ans"] / t["tok_ans"]) if t["tok_ans"] > 0 else None
 
         record = {
+            "schema_version": SCHEMA_VERSION,
             "step": state.global_step,
             "epoch": round(state.epoch, 4) if state.epoch is not None else None,
             "n_ua": t["n_ua"], "n_ans": t["n_ans"],
@@ -383,6 +391,10 @@ def main():
     ap.add_argument("--check-spans", type=int, default=0,
                     help="N>0이면 학습 없이 앞 N건의 field/content 토큰 구간만 출력하고 종료")
     args = ap.parse_args()
+
+    print(f"[스키마 확인] train_qlora_diag.py SCHEMA_VERSION={SCHEMA_VERSION}")
+    print("[스키마 확인] 이 줄이 안 보이거나 SCHEMA_VERSION이 다르면 구버전 스크립트가 "
+          "번들링된 것이므로 즉시 중단하고 재배포 후 재실행할 것.")
 
     cfg = load_config(args.config)
     seed = args.seed if args.seed is not None else cfg["seed"]
