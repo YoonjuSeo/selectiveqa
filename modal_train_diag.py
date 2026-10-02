@@ -38,6 +38,7 @@ image = (
     .add_local_file("config_llama.yaml", "/root/proj/config_llama.yaml")
     .add_local_file("config_kanana.yaml", "/root/proj/config_kanana.yaml")
     .add_local_file("config_ax31.yaml", "/root/proj/config_ax31.yaml")
+    .add_local_file("config_abl_exaone_outproj.yaml", "/root/proj/config_abl_exaone_outproj.yaml")
     .add_local_dir("src", "/root/proj/src")
     .add_local_dir("data/processed", "/root/proj/data/processed")
 )

@@ -416,10 +416,15 @@ def main():
     model = prepare_model_for_kbit_training(model)
     model.config.use_cache = False
 
+    # LoRA 적용 모듈. config 에 키가 없으면 기존 실험과 동일한 목록을 쓴다.
+    # (주의: EXAONE 은 attention 출력층 이름이 out_proj 라서 기본 목록에서는 q/k/v 3종에만 적용됨)
+    target_modules = cfg["train"].get("lora_target_modules",
+                                       ["q_proj", "k_proj", "v_proj", "o_proj"])
+    print(f"LoRA 대상 모듈: {target_modules}")
     lora = LoraConfig(
         r=cfg["train"]["lora_r"], lora_alpha=cfg["train"]["lora_alpha"],
         lora_dropout=cfg["train"]["lora_dropout"],
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+        target_modules=target_modules,
         task_type="CAUSAL_LM",
     )
     model = get_peft_model(model, lora)
