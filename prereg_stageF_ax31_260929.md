@@ -97,7 +97,6 @@ Tier 0-a에서 M0 UA 타깃 NLL은 EXAONE 0.0995, 무손실형 3모델 0.000005~
 
 ## 11. 기록
 
-=======
 ### 11.1 사전 점검 (2026-10-01)
 - revision: 9b41bb2406472634d8812c0b8931fa40fa9a6c3a
 - preflight_tokenizer.py: 과제 지시문 1회, 템플릿 기본 system 문구 없음, BOS 없음, 학습/추론 토큰열 일치, eos `<|im_end|>`(id 27)가 generation eos [27]에 포함 → PASS
