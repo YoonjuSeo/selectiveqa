@@ -22,6 +22,7 @@ import yaml
 from transformers import AutoTokenizer, GenerationConfig
 
 from inference.prompts import (SYSTEM_PROMPT, build_messages, build_target,
+<<<<<<< HEAD
                                apply_template)
 try:  # 권장 프롬프트 절제 패치를 적용한 경우에만 존재하는 함수
     from inference.prompts import set_system_prompt_style, current_system_prompt
@@ -31,6 +32,10 @@ except ImportError:  # 미적용 상태: 과제 지시문만 쓰는 기존 동�
 
     def current_system_prompt():
         return SYSTEM_PROMPT
+=======
+                               apply_template, set_system_prompt_style,
+                               current_system_prompt)
+>>>>>>> fc8d2a9e2865b5b8fc51e35daf90d1f47a13f440
 
 # 템플릿이 몰래 넣을 수 있는 기본 system 문구의 흔적 (A.X 템플릿의 도구 호출 안내 등)
 SUSPECT_DEFAULT_SYSTEM = ["도구 호출", "You are a helpful assistant", "Cutting Knowledge Date"]
@@ -107,4 +112,8 @@ def main():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     main()
+=======
+    main()
+>>>>>>> fc8d2a9e2865b5b8fc51e35daf90d1f47a13f440
