@@ -108,6 +108,31 @@ def collate(batch, pad_id):
     }
 
 
+def check_lora_coverage(model, target_modules, n_layers):
+    """LoRA 대상 모듈이 전 층에 실제로 적용됐는지 검사 (2026-10-03 추가).
+
+    배경: peft 는 target_modules 중 하나라도 이름이 맞으면 경고 없이 학습한다.
+    EXAONE 은 attention 출력층 이름이 out_proj 라서 o_proj 를 지정하면 q/k/v 3종에만
+    적용되었다(96모듈, 9.44M). 이 검사는 대상 모듈마다 적용 층 수가 num_hidden_layers 와
+    같은지 확인하고, 다르면 학습 전에 중단한다. 학습 내용에는 영향을 주지 않는다.
+    """
+    from collections import Counter
+    from peft.tuners.lora import LoraLayer
+
+    counts = Counter(name.rsplit(".", 1)[-1]
+                     for name, mod in model.named_modules() if isinstance(mod, LoraLayer))
+    total = sum(counts.values())
+    print(f"[LoRA 적용 검사] 층 수={n_layers}, 모듈별 적용 수={dict(counts)}, 합계={total}")
+
+    if n_layers is None:
+        raise RuntimeError("[LoRA 적용 검사] 모델 config 에서 층 수를 찾지 못했습니다.")
+    bad = {m: counts.get(m, 0) for m in target_modules if counts.get(m, 0) != n_layers}
+    if bad:
+        raise RuntimeError(f"[LoRA 적용 검사] 실패 — 적용 층 수가 {n_layers}가 아닌 모듈: {bad}. "
+                           f"target_modules 이름이 이 모델의 모듈 이름과 맞는지 확인하세요.")
+    print(f"[LoRA 적용 검사] 통과 — {len(target_modules)}종 × {n_layers}층 = {total}모듈")
+
+
 def main():
     import argparse
     ap = argparse.ArgumentParser()
@@ -163,8 +188,11 @@ def main():
         target_modules=target_modules,
         task_type="CAUSAL_LM",
     )
+    n_layers = (getattr(model.config, "num_hidden_layers", None)
+                or getattr(model.config, "num_layers", None))   # EXAONE 원격 config 대비
     model = get_peft_model(model, lora)
     model.print_trainable_parameters()
+    check_lora_coverage(model, target_modules, n_layers)   # 2026-10-03 추가: out_proj 누락 재발 방지
 
     train_path = Path(cfg["paths"]["processed_dir"]) / args.train_file
     ua_style = cfg["train"].get("ua_target", "null")
