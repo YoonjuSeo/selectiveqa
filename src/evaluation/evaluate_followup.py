@@ -330,7 +330,7 @@ def main():
     ap.add_argument("--m2-glob", default="preds_M2_r05_s*.jsonl")
     ap.add_argument("--tag", default="r05")
     ap.add_argument("--n-boot", type=int, default=None, help="미지정 시 config 값(10000)")
-    ap.add_argument("--h4-signal", default="entropy_full",
+    ap.add_argument("--h4-signal", default="m1_conf",
                     choices=["entropy_full", "margin_full", "one_minus_conf", "m1_conf"])
     ap.add_argument("--exclude-files", nargs="*",
                     default=["excluded_gold_v2.json", "excluded_gold_v2_manual.json"])
