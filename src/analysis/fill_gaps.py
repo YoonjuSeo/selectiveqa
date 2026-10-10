@@ -106,6 +106,9 @@ def main():
     ap.add_argument("--config", default="config.yaml")
     ap.add_argument("--n-boot", type=int, default=10000)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--m1-glob", default="preds_M1_v2_s*.jsonl",
+                    help="natua AUROC의 기준이 되는 M1 본평가 예측 파일 패턴 "
+                         "(EXAONE out_proj: preds_M1_pin_s*.jsonl). 기본값은 기존 동작과 동일")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -136,7 +139,7 @@ def main():
               "| 평균 응답 토큰:", fmt(s0["ans_mean_tokens"], 1), "| 파싱실패:", fmt(s0["parse_fail"]))
 
     # ---------------- M1 (시드별)
-    m1_files = sorted(glob.glob(str(res / "preds_M1_v2_s*.jsonl")))
+    m1_files = sorted(glob.glob(str(res / args.m1_glob)))
     m1_rows = {}
     if m1_files:
         report["M1"] = {}
@@ -228,7 +231,13 @@ def main():
             n2 = load_preds(f)
             ab = float(np.mean([is_abstain(r) for r in n2.values()]))
             report["natua"][f"M2_s{seed}_abstain"] = ab
-            print(f"     M2-r05 s{seed} 무응답률: {fmt(ab)}")
+            resid = {}
+            for r in n2.values():
+                if not is_abstain(r):
+                    k = r.get("orig_type", "?")
+                    resid[k] = resid.get(k, 0) + 1
+            report["natua"][f"M2_s{seed}_residual_by_type"] = resid
+            print(f"     M2-r05 s{seed} 무응답률: {fmt(ab)} | 잔여 환각 유형별 건수: {resid}")
 
     # ---------------- epoch (M2-r05 ep1 vs ep2)
     ep1_files = sorted(glob.glob(str(res / "preds_M2_r05_ep1_s*.jsonl")))
