@@ -1,0 +1,110 @@
+{
+  "purpose": "Phase 2(KLUE) 붕괴 판별 비교 기준 — 금융 결과의 유형 제한 재산출",
+  "types": [
+    "text_span"
+  ],
+  "results_dir": "results\\exaone_outproj",
+  "inputs": {
+    "m0": "results\\exaone_outproj\\preds_M0_v2.jsonl",
+    "m1": {
+      "42": "results\\exaone_outproj\\preds_M1_pin_s42.jsonl",
+      "43": "results\\exaone_outproj\\preds_M1_pin_s43.jsonl",
+      "44": "results\\exaone_outproj\\preds_M1_pin_s44.jsonl"
+    },
+    "m2": {
+      "42": "results\\exaone_outproj\\preds_M2_r05_pin_s42.jsonl",
+      "43": "results\\exaone_outproj\\preds_M2_r05_pin_s43.jsonl",
+      "44": "results\\exaone_outproj\\preds_M2_r05_pin_s44.jsonl"
+    }
+  },
+  "settings": {
+    "n_boot": 10000,
+    "boot_seed": 42,
+    "numeric_tolerance": 0.0001,
+    "n_excluded": 30,
+    "exclusion_rule": "question_ids 필드만 (부록 A 정정)",
+    "em_definition": "무응답=오답 (evaluate_followup 과 동일)"
+  },
+  "per_seed": {
+    "42": {
+      "n": 300,
+      "em_M1": 0.7433333333333333,
+      "em_M2": 0.7233333333333334,
+      "d_em": -0.019999999999999907,
+      "token_ratio": 1.0341207349081365,
+      "tok_M1": 6.35,
+      "tok_M2": 6.566666666666666,
+      "false_abstention_M1": 0.0,
+      "false_abstention_M2": 0.0,
+      "ci_d_em": {
+        "lo": -0.040000000000000036,
+        "hi": 0.0
+      }
+    },
+    "43": {
+      "n": 300,
+      "em_M1": 0.7233333333333334,
+      "em_M2": 0.7366666666666667,
+      "d_em": 0.013333333333333308,
+      "token_ratio": 1.0,
+      "tok_M1": 6.443333333333333,
+      "tok_M2": 6.443333333333333,
+      "false_abstention_M1": 0.0,
+      "false_abstention_M2": 0.0,
+      "ci_d_em": {
+        "lo": -0.016666666666666607,
+        "hi": 0.043333333333333335
+      }
+    },
+    "44": {
+      "n": 300,
+      "em_M1": 0.7333333333333333,
+      "em_M2": 0.7433333333333333,
+      "d_em": 0.010000000000000009,
+      "token_ratio": 0.9893503727369543,
+      "tok_M1": 6.26,
+      "tok_M2": 6.193333333333333,
+      "false_abstention_M1": 0.0,
+      "false_abstention_M2": 0.0,
+      "ci_d_em": {
+        "lo": -0.01666666666666672,
+        "hi": 0.036666666666666625
+      }
+    }
+  },
+  "summary": {
+    "d_em": {
+      "mean": 0.0011111111111111367,
+      "sd": 0.018358568490953613,
+      "min": -0.019999999999999907,
+      "max": 0.013333333333333308
+    },
+    "em_M1": {
+      "mean": 0.7333333333333334,
+      "sd": 0.009999999999999953,
+      "min": 0.7233333333333334,
+      "max": 0.7433333333333333
+    },
+    "em_M2": {
+      "mean": 0.7344444444444443,
+      "sd": 0.010183501544346269,
+      "min": 0.7233333333333334,
+      "max": 0.7433333333333333
+    },
+    "token_ratio": {
+      "mean": 1.0078237025483636,
+      "sd": 0.023388118210079654,
+      "min": 0.9893503727369543,
+      "max": 1.0341207349081365
+    },
+    "false_abstention_M2": {
+      "mean": 0.0,
+      "sd": 0.0,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "h2_pass_seeds": 2,
+    "n_seeds": 3
+  },
+  "verified_against_official": null
+}
