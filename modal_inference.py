@@ -63,7 +63,8 @@ hf_cache_vol = modal.Volume.from_name("hf-cache", create_if_missing=True)
     timeout=6 * 60 * 60,
 )
 def infer(condition: str, eval_file: str, adapter_dir: str | None,
-          out_tag: str | None, seed: int | None, limit: int | None, fresh: bool, config: str):
+          out_tag: str | None, seed: int | None, limit: int | None, fresh: bool, config: str,
+          dedupe_bos: bool = False):
     import os
     import subprocess
     import sys
@@ -86,6 +87,8 @@ def infer(condition: str, eval_file: str, adapter_dir: str | None,
         cmd += ["--limit", str(limit)]
     if fresh:
         cmd += ["--fresh"]
+    if dedupe_bos:
+        cmd += ["--dedupe-bos"]
 
     print("실행:", " ".join(cmd))
     try:
@@ -109,17 +112,18 @@ def main(
     fresh: bool = False,
     wait: bool = False,
     config: str = "config.yaml",  
+    dedupe_bos: bool = False,
 ):
     if wait:
         # 스모크용: 로그를 터미널에서 직접 보며 완료까지 대기 (detach 불필요)
         infer.remote(condition=condition, eval_file=eval_file,
                      adapter_dir=adapter_dir, out_tag=out_tag,
-                     seed=seed, limit=limit, fresh=fresh, config=config)   
+                     seed=seed, limit=limit, fresh=fresh, config=config, dedupe_bos=dedupe_bos)
     else:
         # 본 실행용: 제출 후 즉시 종료 (반드시 --detach와 함께)
         call = infer.spawn(condition=condition, eval_file=eval_file,
                            adapter_dir=adapter_dir, out_tag=out_tag,
                            seed=seed, limit=limit, fresh=fresh,
-                           config=config)   
+                           config=config, dedupe_bos=dedupe_bos)
         print(f"작업 제출 완료 (function call id: {call.object_id})")
         print("진행 상황: https://modal.com/apps → selectiveqa-infer → App Logs")

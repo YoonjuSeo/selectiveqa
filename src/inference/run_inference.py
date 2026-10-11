@@ -140,11 +140,29 @@ def answer_token_range(tokenizer, gen_ids, gen_text, answer_value):
     return (idxs[0], idxs[-1] + 1) if idxs else None
 
 
+def dedupe_leading_bos(inputs, bos_id):
+    """입력 맨 앞에 BOS가 두 번 연속이면 하나를 제거한다 (템플릿 BOS + 토크나이저 자동 BOS).
+
+    BOS 점검(4.8.3절) 전용. 중복이 없으면 입력을 그대로 두므로, 템플릿에 BOS가 없는
+    모델에 켜도 토큰열이 바뀌지 않는다. 반환: (inputs, 제거 여부)
+    """
+    ids = inputs["input_ids"]
+    if bos_id is None or ids.shape[1] < 2 or not (int(ids[0, 0]) == bos_id == int(ids[0, 1])):
+        return inputs, False
+    for k in list(inputs.keys()):
+        inputs[k] = inputs[k][:, 1:]
+    return inputs, True
+
+
 @torch.no_grad()
-def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None):
+def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None, dedupe_bos=False):
     messages = build_messages(row["context"], row["question"])
     prompt = apply_template(tokenizer, messages, enable_thinking)
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    inputs = tokenizer(prompt, return_tensors="pt")
+    bos_removed = False
+    if dedupe_bos:
+        inputs, bos_removed = dedupe_leading_bos(inputs, tokenizer.bos_token_id)
+    inputs = inputs.to(model.device)
 
     out = model.generate(
         **inputs,
@@ -173,7 +191,8 @@ def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None):
                 "confidence": 0.0, "min_token_prob": 0.0, "conf_scope": "empty",
                 "n_gen_tokens": 0, "n_answer_tokens": 0,
                 "entropy_mean": None, "margin_mean": None,
-                "entropy_full": None, "margin_full": None}
+                "entropy_full": None, "margin_full": None,
+                **({"bos_dedup": bos_removed} if dedupe_bos else {})}
     gen_ids = [t for t, _, _, _ in keep]
     logps = [lp for _, lp, _, _ in keep]
     ents = [en for _, _, en, _ in keep]
@@ -210,6 +229,7 @@ def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None):
         "margin_mean": sum(span_margins) / len(span_margins),  # answer 구간 평균 top1−top2
         "entropy_full": sum(ents) / len(ents),
         "margin_full": sum(margins) / len(margins),
+        **({"bos_dedup": bos_removed} if dedupe_bos else {}),
     }
 
 
@@ -229,6 +249,8 @@ def main():
                     help="어댑터 경로 직접 지정 (에폭 어댑터·M2 용, --seed보다 우선)")
     ap.add_argument("--out-tag", default=None,
                     help="출력 파일 태그 (기본: condition 또는 condition_s{seed})")
+    ap.add_argument("--dedupe-bos", action="store_true",
+                    help="BOS 점검(4.8.3절): 입력 맨 앞 BOS 중복을 하나로 줄인다. 기본 꺼짐(기존 동작과 동일)")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -266,10 +288,14 @@ def main():
         print(f"이미 전건 완료: {out_path} ({n_done}건). 재실행하려면 --fresh 사용.")
         return
 
+    n_dedup = 0
     with open(out_path, "a", encoding="utf-8") as f:
         for row in tqdm(todo, desc=f"추론 {args.condition}",
                         initial=n_done, total=n_done + len(todo)):
-            pred = predict_one(model, tokenizer, row, cfg["inference"]["max_new_tokens"],enable_thinking=cfg["model"].get("enable_thinking"))
+            pred = predict_one(model, tokenizer, row, cfg["inference"]["max_new_tokens"],enable_thinking=cfg["model"].get("enable_thinking"),
+                               dedupe_bos=args.dedupe_bos)
+            if pred.get("bos_dedup"):
+                n_dedup += 1
             if pred["conf_scope"] != "answer_span":
                 n_fallback += 1
             record = {
@@ -287,6 +313,9 @@ def main():
     print(f"저장: {out_path} ({n_total}건, 이번 실행 {len(todo)}건)")
     print(f"answer_span 탐지 실패(전체 평균 폴백): {n_fallback}건 "
           f"({100 * n_fallback / n_total:.1f}%) — 10%를 넘으면 파싱 로직 점검 필요")
+    if args.dedupe_bos:
+        print(f"BOS 중복 제거: 이번 실행 {n_dedup}/{len(todo)}건 "
+              f"(0건이면 이 모델은 중복이 없어 기존과 같은 입력)")
 
 
 if __name__ == "__main__":
