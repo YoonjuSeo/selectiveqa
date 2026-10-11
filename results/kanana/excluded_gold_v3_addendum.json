@@ -1,0 +1,10 @@
+{
+  "question_ids": [
+    "numeric-568446ab-47f9-4b20-9962-80153a4c081f",
+    "numeric-f119377c-cfde-4b6b-a95e-39fca105a3cf",
+    "numeric-9d89097c-40bc-4383-916d-8df45e49fb3f",
+    "numeric-30631a3b-e9a0-479e-89f2-898234b8126c",
+    "numeric-5f572dee-2692-49db-b52f-36cd0d393fcd"
+  ],
+  "reason": "숫자연산 원천 데이터에서 근거 문장이 정답 필드로 들어간 불량 gold. v2 제외 목록 누락분. 2026-10-01 Stage F M0 점검 중 발견"
+}
