@@ -69,3 +69,4 @@ seed 42에서 아래 중 **하나라도** 해당하면 그 모델은 seed 43·44
 | 2026-10-11 | 본 문서와 코드 변경 커밋 (BOS 1개 결과 확인 전) |
 | 2026-10-11 | 1단계: preflight_tokenizer.py로 Kanana·Llama 모두 추론 입력 BOS 중복 확인(앞 두 토큰 <\|begin_of_text\|> ×2, 학습 대비 +1토큰) → 두 모델 모두 대상 |
 | 2026-10-11 | 2단계 재현 관문 통과: M1 seed 42 앞 100건을 옵션 없이 재추론(Modal somajuju08, L4), Kanana·Llama 모두 answer 100/100·answerable 100/100·신뢰도 차이 최대 0.0000 → 원 예측을 BOS 2개 대조군으로 사용 |
+| 2026-10-12 | 3단계 seed 42 완료(BOS 제거 1767/1767). 확장 판정: Kanana 해당 없음(H 판정 불변, 최대 M0 hard UA +4.5%p) → 종료. Llama 해당(M0 hard UA +7.5%p, M0 EM +4.5%p, M2-r05 hard UA −5.6%p; H 판정 불변) → s43·s44 M1·M2-r05 추론 |
