@@ -324,16 +324,3 @@ python src/data_prep/check_seq_len.py --config config_<model>.yaml        # max_
 - **BOS 중복 점검** (`prereg_bos_check_261011.md`, `run_inference.py --dedupe-bos`): Kanana·Llama의 추론 입력 BOS 중복이 판정에 미치는 영향 확인 (기본값은 꺼짐)
 - **민감도 분석**: yes/no 재채점(`sensitivity_yesno.py`, `rescore_yesno_diff.py`), 손상 정답 제외(`sensitivity_goldlen.py`), 추가 불량 정답 5건 제외(`results/kanana/metrics_followup_r05_ex35.json`)
 
----
-
-## 인용
-
-```bibtex
-@mastersthesis{seo2026selectiveqa,
-  author = {서윤주},
-  title  = {한국어 금융 기계독해 sLLM의 도메인 파인튜닝에 따른 무응답 행동의 소거와 복원에 관한 연구},
-  school = {한양대학교 인공지능융합대학원},
-  year   = {2026},
-  note   = {석사학위논문}
-}
-```
