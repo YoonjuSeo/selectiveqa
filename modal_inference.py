@@ -41,6 +41,7 @@ image = (
     .add_local_file("config_klue_exaone.yaml", "/root/proj/config_klue_exaone.yaml")
     .add_local_file("config_klue_kanana.yaml", "/root/proj/config_klue_kanana.yaml")
     .add_local_file("config_klue_exaone_outproj.yaml", "/root/proj/config_klue_exaone_outproj.yaml")  # 2026-10-04
+    .add_local_file("config_abl_exaone_qkv_pin.yaml", "/root/proj/config_abl_exaone_qkv_pin.yaml")  # 2026-10-28 원인 분리(q/k/v, 4.57.1)
     .add_local_dir("src", "/root/proj/src")
     .add_local_dir("data/processed", "/root/proj/data/processed")
 )
