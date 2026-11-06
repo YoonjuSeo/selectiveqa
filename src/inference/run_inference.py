@@ -31,7 +31,7 @@ from peft import PeftModel
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-from inference.prompts import build_messages, parse_model_output, apply_template
+from inference.prompts import build_messages, parse_model_output, apply_template, build_messages_closed_book
 
 
 def load_config(path="config.yaml"):
@@ -155,8 +155,13 @@ def dedupe_leading_bos(inputs, bos_id):
 
 
 @torch.no_grad()
-def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None, dedupe_bos=False):
-    messages = build_messages(row["context"], row["question"])
+def predict_one(model, tokenizer, row, max_new_tokens, enable_thinking=None, dedupe_bos=False,
+                closed_book=None):
+    # closed_book(None|"force"|"abstain"): None이면 기존과 동일(지문 포함). 2026-11-06 통제 조건.
+    if closed_book:
+        messages = build_messages_closed_book(row["question"], closed_book)
+    else:
+        messages = build_messages(row["context"], row["question"])
     prompt = apply_template(tokenizer, messages, enable_thinking)
     inputs = tokenizer(prompt, return_tensors="pt")
     bos_removed = False
@@ -251,6 +256,10 @@ def main():
                     help="출력 파일 태그 (기본: condition 또는 condition_s{seed})")
     ap.add_argument("--dedupe-bos", action="store_true",
                     help="BOS 점검(4.8.3절): 입력 맨 앞 BOS 중복을 하나로 줄인다. 기본 꺼짐(기존 동작과 동일)")
+    ap.add_argument("--closed-book", choices=["force", "abstain"], default=None,
+                    help="closed-book 통제(사전지식 점검): 지문 없이 질문만 입력. 기본 꺼짐(기존 동작과 동일). "
+                         "force=반드시 답하게(주 조건), abstain=무응답 허용(탐색적). "
+                         "레코드에 closed_book·orig_gold 필드를 추가하고 출력 태그 기본값은 {condition}_cb_{mode}")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -262,6 +271,8 @@ def main():
         tag = f"M1_s{args.seed}"
     if args.adapter_dir:
         adapter_dir = args.adapter_dir
+    if args.closed_book and not args.out_tag:
+        tag = f"{tag}_cb_{args.closed_book}"
     if args.out_tag:
         tag = args.out_tag
     model, tokenizer = load_model(cfg, args.condition, adapter_dir)
@@ -293,7 +304,7 @@ def main():
         for row in tqdm(todo, desc=f"추론 {args.condition}",
                         initial=n_done, total=n_done + len(todo)):
             pred = predict_one(model, tokenizer, row, cfg["inference"]["max_new_tokens"],enable_thinking=cfg["model"].get("enable_thinking"),
-                               dedupe_bos=args.dedupe_bos)
+                               dedupe_bos=args.dedupe_bos, closed_book=args.closed_book)
             if pred.get("bos_dedup"):
                 n_dedup += 1
             if pred["conf_scope"] != "answer_span":
@@ -304,6 +315,8 @@ def main():
                 "orig_type": row.get("orig_type"),          # unanswerable의 원유형
                 "gold_answerable": row.get("answerable", True),  # 정답측 응답가능 여부
                 "gold_answer": row["gold_answer"],
+                **({"closed_book": args.closed_book,
+                    "orig_gold": row.get("orig_gold")} if args.closed_book else {}),  # UA의 편집 전 원 정답
                 **pred,
             }
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
